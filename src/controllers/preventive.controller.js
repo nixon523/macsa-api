@@ -1,4 +1,4 @@
-import asyncHandler from '../utils/asyncHandler.js';
+﻿import asyncHandler from '../utils/asyncHandler.js';
 import * as preventiveService from '../services/preventive.service.js';
 
 export const listPreventiveSchedules = asyncHandler(async (req, res) => {
@@ -11,14 +11,14 @@ export const createPreventiveSchedule = asyncHandler(async (req, res) => {
 });
 
 export const amendPreventiveSchedule = asyncHandler(async (req, res) => {
-  await preventiveService.amendPreventiveSchedule(Number(req.params.id), req.body, req.user);
+  await preventiveService.amendPreventiveSchedule(req.params.id, req.body, req.user);
   res.json({ message: 'Plan preventivo modificado correctamente.' });
 });
 
 export const recordExecution = asyncHandler(async (req, res) => {
   await preventiveService.recordPreventiveExecution(
-    Number(req.params.id),
-    Number(req.body.workOrderId),
+    req.params.id,
+    req.body.workOrderId,
     req.user,
   );
   res.json({ message: 'Ejecución registrada correctamente.' });
@@ -26,7 +26,7 @@ export const recordExecution = asyncHandler(async (req, res) => {
 
 export const toggleStatus = asyncHandler(async (req, res) => {
   await preventiveService.togglePreventiveScheduleStatus(
-    Number(req.params.id),
+    req.params.id,
     req.body,
     req.user,
   );

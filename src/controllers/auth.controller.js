@@ -1,4 +1,4 @@
-import asyncHandler from '../utils/asyncHandler.js';
+﻿import asyncHandler from '../utils/asyncHandler.js';
 import * as authService from '../services/auth.service.js';
 import { signToken } from '../security/jwt.js';
 import { rolePermissions } from '../security/rolePermissions.js';
@@ -7,15 +7,19 @@ export const login = asyncHandler(async (req, res) => {
   const { username, password } = req.body;
   const user = await authService.login(username, password);
 
+  const effectivePermissions = (user.permissions && user.permissions.length > 0)
+    ? user.permissions
+    : rolePermissions(user.roleCode);
+
   const token = signToken({
     sub: user.userId,
     username: user.username,
     displayName: user.displayName,
     role: user.roleCode,
-    permissions: rolePermissions(user.roleCode),
+    permissions: effectivePermissions,
   });
 
-  res.json({ token, user });
+  res.json({ token, user: { ...user, permissions: effectivePermissions } });
 });
 
 export const me = asyncHandler(async (req, res) => {

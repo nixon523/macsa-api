@@ -1,28 +1,55 @@
-﻿import { execProc } from '../config/db.js';
+﻿import { execProc, buildTvp, sql } from '../config/db.js';
 import { hashPassword } from '../security/password.js';
 
+const PERMISSION_COLUMNS = [{ name: 'Valor', type: sql.NVarChar(50) }];
+
+function permissionsTvp(permissions = []) {
+  const rows = permissions.map((p) => ({ Valor: String(p) }));
+  return buildTvp('TipoListaTexto', PERMISSION_COLUMNS, rows);
+}
+
+function mapUserRow(row) {
+  if (!row) return null;
+  const permissions = Array.isArray(row.permissions)
+    ? row.permissions
+    : (row.PermissionsCsv ?? row.permissionsCsv)
+      ? (row.PermissionsCsv ?? row.permissionsCsv).split(',').filter(Boolean)
+      : [];
+  return {
+    ...row,
+    permissions,
+  };
+}
+
 export async function getAllUsers() {
-  return execProc('uspUsuarioObtenerTodos');
+  const rows = await execProc('uspUsuarioObtenerTodos');
+  return rows.map(mapUserRow);
 }
 
 export async function getUserById(userId) {
   const rows = await execProc('uspUsuarioObtenerPorId', { UserId: userId });
-  return rows[0] ?? null;
+  return mapUserRow(rows[0]) ?? null;
 }
 
-export async function createUser({ username, displayName, roleCode, password }) {
+export async function createUser({ username, displayName, roleCode, password, permissions }) {
   const credentials = hashPassword(password);
-  return execProc('uspUsuarioCrear', {
+  const inputs = {
     Username: username,
     DisplayName: displayName,
     RoleCode: roleCode,
     PasswordSalt: credentials.salt,
     PasswordHash: credentials.hash,
     PasswordIterations: credentials.iterations,
-  });
+  };
+
+  if (Array.isArray(permissions) && permissions.length > 0) {
+    inputs.Permissions = permissionsTvp(permissions);
+  }
+
+  return execProc('uspUsuarioCrear', inputs);
 }
 
-export async function updateUser(userId, { displayName, roleCode, newPassword }) {
+export async function updateUser(userId, { displayName, roleCode, newPassword, permissions }) {
   const inputs = {
     UserId: userId,
     DisplayName: displayName ?? undefined,
@@ -30,6 +57,8 @@ export async function updateUser(userId, { displayName, roleCode, newPassword })
     NewSalt: undefined,
     NewHash: undefined,
     NewIterations: undefined,
+    HasCustomPermissions: Array.isArray(permissions) ? 1 : 0,
+    Permissions: Array.isArray(permissions) ? permissionsTvp(permissions) : undefined,
   };
 
   if (newPassword) {

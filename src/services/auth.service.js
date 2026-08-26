@@ -41,11 +41,16 @@ export async function login(username, password) {
 
   await execProc('uspLoginReiniciarIntentos', { UserId: user.UserId });
 
+  const permissions = (user.PermissionsCsv ?? user.permissionsCsv)
+    ? (user.PermissionsCsv ?? user.permissionsCsv).split(',').filter(Boolean)
+    : [];
+
   return {
     userId: user.UserId,
     username: user.Username,
     displayName: user.DisplayName,
     roleCode: user.RoleCode,
+    permissions,
     mustChangePassword: Boolean(user.MustChangePassword),
     passwordResetRequested: Boolean(user.PasswordResetRequested),
   };

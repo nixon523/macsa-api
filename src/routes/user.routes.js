@@ -19,7 +19,8 @@ router.post(
   body('username').isString().trim().notEmpty(),
   body('displayName').isString().trim().notEmpty(),
   body('roleCode').isIn(VALID_ROLES),
-  body('password').isString().isLength({ min: 6 }),
+  body('password').isString().isLength({ min: 4 }),
+  body('permissions').optional().isArray(),
   handleValidationErrors,
   userController.createUser,
 );
@@ -28,7 +29,8 @@ router.put(
   '/:id',
   body('displayName').optional().isString().trim().notEmpty(),
   body('roleCode').optional().isIn(VALID_ROLES),
-  body('newPassword').optional().isString().isLength({ min: 6 }),
+  body('newPassword').optional().isString().isLength({ min: 4 }),
+  body('permissions').optional().isArray(),
   handleValidationErrors,
   userController.updateUser,
 );

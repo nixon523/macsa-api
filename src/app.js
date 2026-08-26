@@ -1,4 +1,4 @@
-import express from 'express';
+﻿import express from 'express';
 import helmet from 'helmet';
 import cors from 'cors';
 import morgan from 'morgan';
@@ -13,7 +13,13 @@ const app = express();
 app.use(helmet());
 app.use(cors({ origin: env.corsOrigin === '*' ? true : env.corsOrigin.split(',') }));
 app.use(express.json({ limit: '3mb' }));
-app.use(morgan(env.nodeEnv === 'production' ? 'combined' : 'dev'));
+
+// Solo mostrar en consola solicitudes con error (>= 400), evitando saturación por polling
+app.use(
+  morgan(env.nodeEnv === 'production' ? 'combined' : 'dev', {
+    skip: (_req, res) => res.statusCode < 400,
+  }),
+);
 
 const globalLimiter = rateLimit({
   windowMs: env.rateLimit.global.windowMs,
@@ -31,6 +37,7 @@ const loginLimiter = rateLimit({
   message: { message: 'Demasiados intentos de inicio de sesión. Espere unos minutos.' },
 });
 app.use('/api/auth/login', loginLimiter);
+app.use('/api/autenticacion/login', loginLimiter);
 
 app.use('/api', routes);
 

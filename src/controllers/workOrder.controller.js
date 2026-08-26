@@ -1,4 +1,4 @@
-import asyncHandler from '../utils/asyncHandler.js';
+﻿import asyncHandler from '../utils/asyncHandler.js';
 import * as workOrderService from '../services/workOrder.service.js';
 
 export const listWorkOrders = asyncHandler(async (req, res) => {
@@ -16,7 +16,7 @@ export const createWorkOrder = asyncHandler(async (req, res) => {
 
 export const updateWorkOrderStatus = asyncHandler(async (req, res) => {
   await workOrderService.updateWorkOrderStatus(
-    Number(req.params.id),
+    req.params.id,
     req.body.newStatus,
     req.user,
   );
@@ -24,6 +24,6 @@ export const updateWorkOrderStatus = asyncHandler(async (req, res) => {
 });
 
 export const updateWorkOrderDetails = asyncHandler(async (req, res) => {
-  await workOrderService.updateWorkOrderDetails(Number(req.params.id), req.body, req.user);
+  await workOrderService.updateWorkOrderDetails(req.params.id, req.body, req.user);
   res.json({ message: 'OT actualizada correctamente.' });
 });
