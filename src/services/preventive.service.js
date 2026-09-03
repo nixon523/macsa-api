@@ -1,4 +1,4 @@
-﻿import { execProc, buildTvp, typed, sql } from '../config/db.js';
+import { execProc, buildTvp, typed, sql } from '../config/db.js';
 
 const MATERIAL_COLUMNS = [
   { name: 'LineNum', type: sql.Int },
@@ -24,9 +24,24 @@ function materialsTvp(materials = []) {
 }
 
 export async function getAllPreventiveSchedules({ area, status } = {}) {
-  return execProc('uspPlanPreventivoObtenerTodos', {
+  const rows = await execProc('uspPlanPreventivoObtenerTodos', {
     AreaFilter: area || null,
     StatusFilter: status || null,
+  });
+  return rows.map((r) => {
+    let mats = [];
+    let acts = [];
+    try {
+      if (r.MaterialsJson) mats = typeof r.MaterialsJson === 'string' ? JSON.parse(r.MaterialsJson) : r.MaterialsJson;
+    } catch (_) {}
+    try {
+      if (r.ActividadesJson) acts = typeof r.ActividadesJson === 'string' ? JSON.parse(r.ActividadesJson) : r.ActividadesJson;
+    } catch (_) {}
+    return {
+      ...r,
+      materials: mats,
+      activities: acts,
+    };
   });
 }
 
@@ -49,6 +64,9 @@ export async function createPreventiveSchedule(payload, user) {
     Notes: payload.notes ?? null,
     CreatedByUserId: user.userId,
     CreatedByUserName: user.displayName,
+    IntervaloFrecuencia: payload.intervaloFrecuencia ?? payload.frequencyInterval ?? 1,
+    UnidadFrecuencia: payload.unidadFrecuencia ?? payload.frequencyUnit ?? 'meses',
+    ActividadesJson: payload.actividades ? JSON.stringify(payload.actividades) : (payload.activities ? JSON.stringify(payload.activities) : null),
     Materials: materialsTvp(payload.materials),
   });
 }
@@ -92,4 +110,28 @@ export async function togglePreventiveScheduleStatus(scheduleId, payload, user) 
     UserId: user.userId,
     UserName: user.displayName,
   });
+}
+
+
+export async function generateMonthlyWorkOrder(planId, anio, mes, user) {
+  const now = new Date();
+  const targetYear = anio ?? now.getFullYear();
+  const targetMonth = mes ?? (now.getMonth() + 1);
+  const result = await execProc('uspGenerarOrdenTrabajoPreventivaMes', {
+    PlanId: planId,
+    Anio: targetYear,
+    Mes: targetMonth,
+    CreadoPorUsuarioId: user.userId,
+    CreadoPorNombre: user.displayName,
+    NuevaOrdenId: { type: sql.NVarChar(20), output: true },
+  });
+  return { workOrderId: result.output?.NuevaOrdenId ?? result[0]?.NewWorkOrderId };
+}
+
+
+export async function getPreventiveIndicators({ area } = {}) {
+  const rows = await execProc('uspPlanPreventivoObtenerIndicadores', {
+    AreaId: area || null,
+  });
+  return rows[0] ?? {};
 }

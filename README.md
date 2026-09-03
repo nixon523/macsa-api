@@ -16,6 +16,11 @@ npm install
 copy .env.example .env   # editar credenciales y JWT_SECRET
 npm start                # node --env-file=.env src/server.js
 npm run dev              # modo watch
+npm run prod             # ejecutar en segundo plano con PM2
+npm run prod:status      # ver estado del proceso
+npm run prod:logs        # ver logs en vivo
+npm run prod:restart     # reiniciar proceso
+npm run prod:stop        # detener proceso
 ```
 
 La API queda en `http://localhost:3000/api`.

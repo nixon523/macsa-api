@@ -1,4 +1,4 @@
-﻿import asyncHandler from '../utils/asyncHandler.js';
+import asyncHandler from '../utils/asyncHandler.js';
 import * as preventiveService from '../services/preventive.service.js';
 
 export const listPreventiveSchedules = asyncHandler(async (req, res) => {
@@ -21,7 +21,7 @@ export const recordExecution = asyncHandler(async (req, res) => {
     req.body.workOrderId,
     req.user,
   );
-  res.json({ message: 'Ejecución registrada correctamente.' });
+  res.json({ message: 'Ejecuci�n registrada correctamente.' });
 });
 
 export const toggleStatus = asyncHandler(async (req, res) => {
@@ -31,4 +31,16 @@ export const toggleStatus = asyncHandler(async (req, res) => {
     req.user,
   );
   res.json({ message: 'Estado del plan preventivo actualizado correctamente.' });
+});
+
+export const generateMonthlyWorkOrder = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const { anio, mes } = req.body ?? {};
+  const result = await preventiveService.generateMonthlyWorkOrder(id, anio, mes, req.user);
+  res.status(201).json(result);
+});
+
+
+export const getPreventiveIndicators = asyncHandler(async (req, res) => {
+  res.json(await preventiveService.getPreventiveIndicators(req.query));
 });

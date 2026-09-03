@@ -1,27 +1,29 @@
-import asyncHandler from '../utils/asyncHandler.js';
+﻿import asyncHandler from '../utils/asyncHandler.js';
 import * as assetService from '../services/asset.service.js';
 import { ApiError } from '../utils/ApiError.js';
 
 export const listAssetsByParent = asyncHandler(async (req, res) => {
-  res.json(await assetService.getAssetsByParent(req.query.parent));
+  const parent = req.query.parent || req.query.parentAssetCode || req.query.parentAssetId || null;
+  const areaId = req.query.areaId || req.query.area || null;
+  res.json(await assetService.getAssetsByParent(parent, areaId));
 });
 
 export const listAssetsByArea = asyncHandler(async (req, res) => {
-  res.json(await assetService.getAllAssetsByArea(req.params.areaId));
+  const includeAll = req.query.all === 'true' || req.query.includeChildren === 'true';
+  res.json(await assetService.getAssetsByArea(req.params.areaId, includeAll));
 });
 
 export const searchAssets = asyncHandler(async (req, res) => {
-  const query = req.query.q;
-  if (!query || query.trim().length < 2) {
-    throw ApiError.badRequest('El término de búsqueda debe tener al menos 2 caracteres.');
-  }
-  res.json(await assetService.searchAssets(query.trim()));
+  const query = req.query.q || '';
+  const areaId = req.query.areaId || req.query.area || null;
+  const status = req.query.status || null;
+  res.json(await assetService.searchAssets(query.trim(), areaId, status));
 });
 
 export const findBySerial = asyncHandler(async (req, res) => {
   const asset = await assetService.findAssetBySerial(req.params.serial);
   if (!asset) {
-    throw ApiError.notFound('No se encontró un activo con ese número de serie.');
+    throw ApiError.notFound('No se encontro un activo con ese numero de serie.');
   }
   res.json(asset);
 });

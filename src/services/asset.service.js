@@ -1,15 +1,25 @@
 ﻿import { execProc } from '../config/db.js';
 
-export async function getAssetsByParent(parentAssetCode) {
-  return execProc('uspActivoObtenerHijos', { ParentAssetCode: parentAssetCode || null });
+export async function getAssetsByParent(parentAssetCode, areaId = null) {
+  return execProc('uspActivoObtenerHijos', { 
+    ParentAssetCode: parentAssetCode || null,
+    AreaId: areaId || null,
+  });
 }
 
-export async function getAllAssetsByArea(areaId) {
+export async function getAssetsByArea(areaId, includeAll = false) {
+  if (includeAll) {
+    return execProc('uspActivoBuscar', { AreaId: areaId, Query: '' });
+  }
   return execProc('uspActivoObtenerRaicesPorArea', { AreaId: areaId });
 }
 
-export async function searchAssets(query) {
-  return execProc('uspActivoBuscar', { Query: query });
+export async function searchAssets(query, areaId = null, status = null) {
+  return execProc('uspActivoBuscar', { 
+    Query: query || '',
+    AreaId: areaId || null,
+    Status: status || null,
+  });
 }
 
 export async function findAssetBySerial(serial) {

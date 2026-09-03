@@ -9,7 +9,12 @@
   },
   "scripts": {
     "start": "node --env-file=.env src/server.js",
-    "dev": "node --watch --env-file=.env src/server.js"
+    "dev": "node --watch --env-file=.env src/server.js",
+    "prod": "pm2 start src/server.js --name macsa-api --node-args=\"--env-file=.env\"",
+    "prod:stop": "pm2 stop macsa-api",
+    "prod:restart": "pm2 restart macsa-api",
+    "prod:logs": "pm2 logs macsa-api",
+    "prod:status": "pm2 status"
   },
   "keywords": [
     "cmms",
@@ -25,6 +30,7 @@
     "helmet": "^8.3.0",
     "jsonwebtoken": "^9.0.3",
     "morgan": "^1.11.0",
-    "mssql": "^12.7.0"
+    "mssql": "^12.7.0",
+    "pm2": "^7.0.4"
   }
 }

@@ -1,4 +1,4 @@
-﻿export const PERMISSIONS = {
+export const PERMISSIONS = {
   dashboardView: 'dashboard.view',
   assetView: 'asset.view',
   assetCreate: 'asset.create',
@@ -32,10 +32,10 @@ export const BREAKDOWN_SEVERITIES = ['low', 'medium', 'high', 'critical'];
 export const BREAKDOWN_STATUSES = ['pending', 'inProgress', 'resolved', 'rejected'];
 
 export const MAINTENANCE_TYPES = [
-  'Mecánico',
-  'Eléctrico',
-  'Electrónico',
-  'Inspección y Lubricación',
+  'Mec�nico',
+  'El�ctrico',
+  'Electr�nico',
+  'Inspecci�n y Lubricaci�n',
   'Otro',
   'mechanical',
   'electrical',
@@ -52,6 +52,7 @@ export const PREVENTIVE_FREQUENCIES_CATALOG = [
   { value: 'Trimestral', code: 'quarterly', label: 'Trimestral', days: 90 },
   { value: 'Semestral', code: 'semiannual', label: 'Semestral', days: 180 },
   { value: 'Anual', code: 'annual', label: 'Anual', days: 365 },
+  { value: 'Bianual', code: 'biannual', label: 'Bianual', days: 730 },
 ];
 
 export const PREVENTIVE_FREQUENCIES = [

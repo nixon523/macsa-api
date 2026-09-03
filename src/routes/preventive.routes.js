@@ -1,4 +1,4 @@
-﻿import { Router } from 'express';
+import { Router } from 'express';
 import { body } from 'express-validator';
 
 import * as preventiveController from '../controllers/preventive.controller.js';
@@ -22,6 +22,12 @@ router.get(
   preventiveController.listPreventiveSchedules,
 );
 
+router.get(
+  '/indicadores',
+  requirePermission(PERMISSIONS.preventiveView),
+  preventiveController.getPreventiveIndicators,
+);
+
 const materialRules = body('materials').optional().isArray().custom((materials) => {
   for (const material of materials ?? []) {
     const hasName = typeof (material.name ?? material.description) === 'string';
@@ -37,7 +43,7 @@ router.post(
   requirePermission(PERMISSIONS.workOrderCreate),
   body('title').optional({ values: 'falsy' }).isString().trim(),
   body('assetCode').isString().trim().notEmpty().withMessage('El activo es obligatorio.'),
-  body('areaId').isString().trim().notEmpty().withMessage('El área es obligatoria.'),
+  body('areaId').optional({ values: 'falsy' }).isString().trim(),
   body('maintenanceType').isString().trim().notEmpty().withMessage('El tipo de mantenimiento es obligatorio.'),
   body('frequency')
     .isString()
@@ -46,14 +52,24 @@ router.post(
     .custom((val) => {
       const match = PREVENTIVE_FREQUENCIES.some((f) => f.toLowerCase() === val.toLowerCase());
       if (!match) {
-        throw new Error(`Frecuencia inválida. Valores: ${PREVENTIVE_FREQUENCIES_CATALOG.map((f) => f.label).join(', ')}`);
+        throw new Error(`Frecuencia inv�lida. Valores: ${PREVENTIVE_FREQUENCIES_CATALOG.map((f) => f.label).join(', ')}`);
       }
       return true;
     }),
-  body('startDate').isISO8601().withMessage('startDate debe ser una fecha válida.'),
+  body('startDate').isISO8601().withMessage('startDate debe ser una fecha v�lida.'),
+  body('activities').optional().isArray(),
+  body('actividades').optional().isArray(),
+  body('intervaloFrecuencia').optional().isInt({ min: 1 }),
+  body('unidadFrecuencia').optional().isString().trim(),
   materialRules,
   handleValidationErrors,
   preventiveController.createPreventiveSchedule,
+);
+
+router.post(
+  '/:id/generar-ot-mes',
+  requirePermission(PERMISSIONS.workOrderCreate),
+  preventiveController.generateMonthlyWorkOrder,
 );
 
 router.put(
@@ -80,7 +96,7 @@ const statusValidators = [
     .custom((val) => {
       const match = PREVENTIVE_STATUSES.some((s) => s.toLowerCase() === (val ?? '').toString().toLowerCase());
       if (!match) {
-        throw new Error(`Estado inválido. Valores: ${PREVENTIVE_STATUSES.join(', ')}`);
+        throw new Error(`Estado inv�lido. Valores: ${PREVENTIVE_STATUSES.join(', ')}`);
       }
       return true;
     }),
