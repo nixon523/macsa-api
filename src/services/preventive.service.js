@@ -117,15 +117,15 @@ export async function generateMonthlyWorkOrder(planId, anio, mes, user) {
   const now = new Date();
   const targetYear = anio ?? now.getFullYear();
   const targetMonth = mes ?? (now.getMonth() + 1);
-  const result = await execProc('uspGenerarOrdenTrabajoPreventivaMes', {
+  const rows = await execProc('uspGenerarOrdenTrabajoPreventivaMes', {
     PlanId: planId,
     Anio: targetYear,
     Mes: targetMonth,
     CreadoPorUsuarioId: user.userId,
     CreadoPorNombre: user.displayName,
-    NuevaOrdenId: { type: sql.NVarChar(20), output: true },
   });
-  return { workOrderId: result.output?.NuevaOrdenId ?? result[0]?.NewWorkOrderId };
+  const workOrderId = rows?.[0]?.NewWorkOrderId ?? rows?.[0]?.NuevaOrdenId;
+  return { workOrderId };
 }
 
 
