@@ -21,7 +21,7 @@ export const recordExecution = asyncHandler(async (req, res) => {
     req.body.workOrderId,
     req.user,
   );
-  res.json({ message: 'Ejecución registrada correctamente.' });
+  res.json({ message: 'Ejecuciï¿½n registrada correctamente.' });
 });
 
 export const toggleStatus = asyncHandler(async (req, res) => {
@@ -43,4 +43,9 @@ export const generateMonthlyWorkOrder = asyncHandler(async (req, res) => {
 
 export const getPreventiveIndicators = asyncHandler(async (req, res) => {
   res.json(await preventiveService.getPreventiveIndicators(req.query));
+});
+
+export const generateBatchMonthlyWorkOrders = asyncHandler(async (req, res) => {
+  const result = await preventiveService.generateBatchMonthlyWorkOrders(req.body, req.user);
+  res.status(201).json(result);
 });

@@ -1,4 +1,4 @@
-﻿import { Router } from 'express';
+import { Router } from 'express';
 import { body } from 'express-validator';
 
 import * as userController from '../controllers/user.controller.js';
@@ -16,10 +16,10 @@ router.get('/:id', userController.getUser);
 
 router.post(
   '/',
-  body('username').isString().trim().notEmpty(),
-  body('displayName').isString().trim().notEmpty(),
-  body('roleCode').isIn(VALID_ROLES),
-  body('password').isString().isLength({ min: 4 }),
+  body('username').isString().trim().notEmpty().withMessage('El nombre de usuario es obligatorio.'),
+  body('displayName').optional({ values: 'falsy' }).isString().trim(),
+  body('roleCode').isIn(VALID_ROLES).withMessage('El rol especificado no es válido.'),
+  body('password').isString().isLength({ min: 4 }).withMessage('La contraseña debe tener al menos 4 caracteres.'),
   body('permissions').optional().isArray(),
   handleValidationErrors,
   userController.createUser,
@@ -27,9 +27,9 @@ router.post(
 
 router.put(
   '/:id',
-  body('displayName').optional().isString().trim().notEmpty(),
-  body('roleCode').optional().isIn(VALID_ROLES),
-  body('newPassword').optional().isString().isLength({ min: 4 }),
+  body('displayName').optional({ values: 'falsy' }).isString().trim(),
+  body('roleCode').optional().isIn(VALID_ROLES).withMessage('El rol especificado no es válido.'),
+  body('newPassword').optional({ values: 'falsy' }).isString().isLength({ min: 4 }).withMessage('La nueva contraseña debe tener al menos 4 caracteres.'),
   body('permissions').optional().isArray(),
   handleValidationErrors,
   userController.updateUser,

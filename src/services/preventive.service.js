@@ -1,4 +1,4 @@
-import { execProc, buildTvp, typed, sql } from '../config/db.js';
+import { execProc, buildTvp, typed, output, sql } from '../config/db.js';
 
 const MATERIAL_COLUMNS = [
   { name: 'LineNum', type: sql.Int },
@@ -123,6 +123,7 @@ export async function generateMonthlyWorkOrder(planId, anio, mes, user) {
     Mes: targetMonth,
     CreadoPorUsuarioId: user.userId,
     CreadoPorNombre: user.displayName,
+    NuevaOrdenId: output(sql.NVarChar(20)),
   });
   const workOrderId = rows?.[0]?.NewWorkOrderId ?? rows?.[0]?.NuevaOrdenId;
   return { workOrderId };
@@ -134,4 +135,18 @@ export async function getPreventiveIndicators({ area } = {}) {
     AreaId: area || null,
   });
   return rows[0] ?? {};
+}
+
+export async function generateBatchMonthlyWorkOrders(payload, user) {
+  const now = new Date();
+  const targetYear = payload.anio ?? now.getFullYear();
+  const targetMonth = payload.mes ?? (now.getMonth() + 1);
+  const rows = await execProc('uspGenerarOrdenesTrabajoPreventivasMasivas', {
+    Anio: targetYear,
+    Mes: targetMonth,
+    AreaId: payload.areaId || null,
+    CreadoPorUsuarioId: user.userId,
+    CreadoPorNombre: user.displayName,
+  });
+  return rows ?? [];
 }

@@ -21,7 +21,7 @@ export const createBreakdownReport = asyncHandler(async (req, res) => {
 export const linkToWorkOrder = asyncHandler(async (req, res) => {
   await breakdownService.linkBreakdownReportToWorkOrder(
     Number(req.params.id),
-    Number(req.body.workOrderId),
+    String(req.body.workOrderId),
     req.user,
   );
   res.json({ message: 'Avería vinculada a la OT correctamente.' });

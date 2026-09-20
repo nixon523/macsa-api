@@ -30,11 +30,13 @@ router.get('/me', requireAuth, authController.me);
 
 const changePasswordValidators = [
   requireAuth,
-  body('currentPassword').isString().notEmpty().withMessage('La contraseña actual es obligatoria.'),
+  body('currentPassword')
+    .optional({ values: 'falsy' })
+    .isString(),
   body('newPassword')
     .isString()
-    .isLength({ min: 6 })
-    .withMessage('La nueva contraseña debe tener al menos 6 caracteres.'),
+    .isLength({ min: 4 })
+    .withMessage('La nueva contraseña debe tener al menos 4 caracteres.'),
   handleValidationErrors,
   authController.changePassword,
 ];

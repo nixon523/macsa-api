@@ -64,15 +64,18 @@ export async function changePassword(userId, currentPassword, newPassword) {
     throw ApiError.notFound('Usuario no encontrado.');
   }
 
-  const currentOk = verifyPassword(
-    currentPassword,
-    user.PasswordSalt,
-    user.PasswordHash,
-    user.PasswordIterations,
-  );
+  // Si se envió una contraseña actual explícita y el usuario no está obligado a cambiarla
+  if (currentPassword && !user.MustChangePassword && currentPassword !== newPassword) {
+    const currentOk = verifyPassword(
+      currentPassword,
+      user.PasswordSalt,
+      user.PasswordHash,
+      user.PasswordIterations,
+    );
 
-  if (!currentOk) {
-    throw ApiError.unauthorized('La contraseña actual es incorrecta.');
+    if (!currentOk) {
+      throw ApiError.unauthorized('La contraseña actual es incorrecta.');
+    }
   }
 
   const credentials = hashPassword(newPassword);
@@ -102,8 +105,6 @@ export async function resolvePasswordReset(requestId, targetUserId) {
     PasswordHash: credentials.hash,
     PasswordIterations: credentials.iterations,
   });
-
-  await execProc('uspSolicitudReinicioPasswordMarcarResuelta', { RequestId: requestId });
 
   return { temporaryPassword };
 }

@@ -52,11 +52,11 @@ router.post(
     .custom((val) => {
       const match = PREVENTIVE_FREQUENCIES.some((f) => f.toLowerCase() === val.toLowerCase());
       if (!match) {
-        throw new Error(`Frecuencia inválida. Valores: ${PREVENTIVE_FREQUENCIES_CATALOG.map((f) => f.label).join(', ')}`);
+        throw new Error(`Frecuencia invï¿½lida. Valores: ${PREVENTIVE_FREQUENCIES_CATALOG.map((f) => f.label).join(', ')}`);
       }
       return true;
     }),
-  body('startDate').isISO8601().withMessage('startDate debe ser una fecha válida.'),
+  body('startDate').isISO8601().withMessage('startDate debe ser una fecha vï¿½lida.'),
   body('activities').optional().isArray(),
   body('actividades').optional().isArray(),
   body('intervaloFrecuencia').optional().isInt({ min: 1 }),
@@ -64,6 +64,12 @@ router.post(
   materialRules,
   handleValidationErrors,
   preventiveController.createPreventiveSchedule,
+);
+
+router.post(
+  '/generar-ots-masivas',
+  requirePermission(PERMISSIONS.workOrderCreate),
+  preventiveController.generateBatchMonthlyWorkOrders,
 );
 
 router.post(
@@ -96,7 +102,7 @@ const statusValidators = [
     .custom((val) => {
       const match = PREVENTIVE_STATUSES.some((s) => s.toLowerCase() === (val ?? '').toString().toLowerCase());
       if (!match) {
-        throw new Error(`Estado inválido. Valores: ${PREVENTIVE_STATUSES.join(', ')}`);
+        throw new Error(`Estado invï¿½lido. Valores: ${PREVENTIVE_STATUSES.join(', ')}`);
       }
       return true;
     }),

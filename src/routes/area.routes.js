@@ -26,9 +26,14 @@ router.put(
   '/:areaId',
   requirePermission(PERMISSIONS.assetEdit),
   body('name').isString().trim().notEmpty().withMessage('El nombre del área es obligatorio.'),
-  body('costCenter').isString().trim().notEmpty().withMessage('El centro de coste es obligatorio.'),
   handleValidationErrors,
   areaController.updateArea,
+);
+
+router.delete(
+  '/:areaId',
+  requirePermission(PERMISSIONS.assetCreate),
+  areaController.deleteArea,
 );
 
 export default router;

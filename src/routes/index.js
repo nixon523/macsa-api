@@ -10,6 +10,7 @@ import breakdownRoutes from './breakdown.routes.js';
 import preventiveRoutes from './preventive.routes.js';
 import kardexRoutes from './kardex.routes.js';
 import dashboardRoutes from './dashboard.routes.js';
+import operationReportRoutes from './operationReport.routes.js';
 
 const router = Router();
 
@@ -28,6 +29,7 @@ router.use('/reportes-averia', breakdownRoutes);
 router.use('/planes-preventivos', preventiveRoutes);
 router.use('/kardex', kardexRoutes);
 router.use('/dashboard', dashboardRoutes);
+router.use('/reportes-operacion', operationReportRoutes);
 
 // Alias de compatibilidad
 router.use('/auth', authRoutes);
@@ -39,3 +41,4 @@ router.use('/breakdown-reports', breakdownRoutes);
 router.use('/preventive-schedules', preventiveRoutes);
 
 export default router;
+

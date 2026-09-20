@@ -1,4 +1,4 @@
-﻿import { execProc, buildTvp, sql } from '../config/db.js';
+import { execProc, buildTvp, sql } from '../config/db.js';
 import { hashPassword } from '../security/password.js';
 
 const PERMISSION_COLUMNS = [{ name: 'Valor', type: sql.NVarChar(50) }];
@@ -33,6 +33,7 @@ export async function getUserById(userId) {
 
 export async function createUser({ username, displayName, roleCode, password, permissions }) {
   const credentials = hashPassword(password);
+  const perms = Array.isArray(permissions) ? permissions : [];
   const inputs = {
     Username: username,
     DisplayName: displayName,
@@ -40,16 +41,16 @@ export async function createUser({ username, displayName, roleCode, password, pe
     PasswordSalt: credentials.salt,
     PasswordHash: credentials.hash,
     PasswordIterations: credentials.iterations,
+    MustChangePassword: 1,
+    HasCustomPermissions: perms.length > 0 ? 1 : 0,
+    Permissions: permissionsTvp(perms),
   };
-
-  if (Array.isArray(permissions) && permissions.length > 0) {
-    inputs.Permissions = permissionsTvp(permissions);
-  }
 
   return execProc('uspUsuarioCrear', inputs);
 }
 
 export async function updateUser(userId, { displayName, roleCode, newPassword, permissions }) {
+  const perms = Array.isArray(permissions) ? permissions : [];
   const inputs = {
     UserId: userId,
     DisplayName: displayName ?? undefined,
@@ -57,8 +58,9 @@ export async function updateUser(userId, { displayName, roleCode, newPassword, p
     NewSalt: undefined,
     NewHash: undefined,
     NewIterations: undefined,
+    MustChangePassword: undefined,
     HasCustomPermissions: Array.isArray(permissions) ? 1 : 0,
-    Permissions: Array.isArray(permissions) ? permissionsTvp(permissions) : undefined,
+    Permissions: permissionsTvp(perms),
   };
 
   if (newPassword) {
@@ -66,6 +68,7 @@ export async function updateUser(userId, { displayName, roleCode, newPassword, p
     inputs.NewSalt = credentials.salt;
     inputs.NewHash = credentials.hash;
     inputs.NewIterations = credentials.iterations;
+    inputs.MustChangePassword = 1;
   }
 
   return execProc('uspUsuarioActualizar', inputs);

@@ -46,6 +46,16 @@ export function typed(type, value) {
   return new TypedValue(type, value);
 }
 
+class OutputParameter {
+  constructor(type) {
+    this.type = type;
+  }
+}
+
+export function output(type) {
+  return new OutputParameter(type);
+}
+
 export function buildTvp(typeName, columns, rows) {
   const table = new sql.Table(typeName.includes('.') ? typeName : `dbo.${typeName}`);
   for (const column of columns) {
@@ -63,7 +73,9 @@ export async function execProc(procName, inputs = {}) {
 
   for (const [name, value] of Object.entries(inputs)) {
     if (value === undefined) continue;
-    if (value instanceof TypedValue) {
+    if (value instanceof OutputParameter) {
+      request.output(name, value.type);
+    } else if (value instanceof TypedValue) {
       request.input(name, value.type, value.value);
     } else if (value instanceof sql.Table) {
       request.input(name, value);
@@ -76,6 +88,14 @@ export async function execProc(procName, inputs = {}) {
 
   if (result.recordsets && result.recordsets.length > 1) {
     return result.recordsets.filter((rs) => rs && rs.length >= 0);
+  }
+
+  if (result.recordset && result.recordset.length > 0) {
+    return result.recordset;
+  }
+
+  if (result.output && Object.keys(result.output).length > 0) {
+    return [result.output];
   }
 
   return result.recordset ?? [];
