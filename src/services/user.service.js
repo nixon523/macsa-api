@@ -32,6 +32,10 @@ export async function getUserById(userId) {
 }
 
 export async function createUser({ username, displayName, roleCode, password, permissions }) {
+  if (!password || typeof password !== 'string' || password.trim().length < 8) {
+    const { ApiError } = await import('../utils/ApiError.js');
+    throw ApiError.badRequest('La contraseña debe tener al menos 8 caracteres.');
+  }
   const credentials = hashPassword(password);
   const perms = Array.isArray(permissions) ? permissions : [];
   const inputs = {
@@ -64,6 +68,10 @@ export async function updateUser(userId, { displayName, roleCode, newPassword, p
   };
 
   if (newPassword) {
+    if (typeof newPassword !== 'string' || newPassword.trim().length < 8) {
+      const { ApiError } = await import('../utils/ApiError.js');
+      throw ApiError.badRequest('La nueva contraseña debe tener al menos 8 caracteres.');
+    }
     const credentials = hashPassword(newPassword);
     inputs.NewSalt = credentials.salt;
     inputs.NewHash = credentials.hash;

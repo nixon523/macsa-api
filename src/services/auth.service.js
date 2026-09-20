@@ -90,6 +90,10 @@ export async function changePassword(userId, currentPassword, newPassword) {
     }
   }
 
+  if (!newPassword || typeof newPassword !== 'string' || newPassword.trim().length < 8) {
+    throw ApiError.badRequest('La nueva contraseña debe tener al menos 8 caracteres.');
+  }
+
   if (currentPassword && currentPassword === newPassword) {
     throw ApiError.badRequest('La nueva contraseña debe ser distinta a la contraseña actual.');
   }
