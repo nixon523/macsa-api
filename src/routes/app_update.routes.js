@@ -6,9 +6,11 @@ import { PERMISSIONS } from '../security/rolePermissions.js';
 
 const router = Router();
 
-// Consultas públicas para que la app móvil verifique actualizaciones antes/durante el login
+// Consultas públicas para que la app móvil verifique y descargue actualizaciones
 router.get('/version-android', appUpdateController.getLatestAndroidVersion);
 router.get('/android-version', appUpdateController.getLatestAndroidVersion);
+router.get('/descargar-apk', appUpdateController.downloadApk);
+router.get('/download-apk', appUpdateController.downloadApk);
 
 // Registro de nueva versión (protegido para administradores)
 router.post(

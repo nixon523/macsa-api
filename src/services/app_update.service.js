@@ -8,28 +8,24 @@ export async function getLatestAndroidVersion() {
     return {
       id: 1,
       version: '1.0.0',
-      downloadUrl: null,
-      releaseNotes: 'Versión inicial.',
       mandatory: false,
       releaseDate: new Date().toISOString().split('T')[0],
+      downloadUrl: '/api/app/descargar-apk',
     };
   }
 
   return {
     id: row.IdApp,
     version: row.VersionApp,
-    downloadUrl: row.UrlDescarga ?? null,
-    releaseNotes: row.NotasCambio ?? null,
     mandatory: Boolean(row.Obligatorio),
     releaseDate: row.Fecha ? new Date(row.Fecha).toISOString().split('T')[0] : null,
+    downloadUrl: '/api/app/descargar-apk',
   };
 }
 
-export async function registerAndroidVersion({ version, downloadUrl, releaseNotes, mandatory }) {
+export async function registerAndroidVersion({ version, mandatory }) {
   const rows = await execProc('uspActualizacionAndroidRegistrar', {
     VersionApp: version,
-    UrlDescarga: downloadUrl ?? null,
-    NotasCambio: releaseNotes ?? null,
     Obligatorio: mandatory ? 1 : 0,
   });
   return rows[0];
