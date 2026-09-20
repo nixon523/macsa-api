@@ -1,4 +1,4 @@
-ï»¿import { Router } from 'express';
+import { Router } from 'express';
 import * as appUpdateController from '../controllers/app_update.controller.js';
 import { requireAuth } from '../middleware/auth.middleware.js';
 import { requirePermission } from '../middleware/permission.middleware.js';
@@ -6,13 +6,14 @@ import { PERMISSIONS } from '../security/rolePermissions.js';
 
 const router = Router();
 
-// Consultas pÃºblicas para que la app mÃ³vil verifique y descargue actualizaciones
+// Consultas públicas para que la app móvil verifique y descargue actualizaciones
 router.get('/version-android', appUpdateController.getLatestAndroidVersion);
 router.get('/android-version', appUpdateController.getLatestAndroidVersion);
 router.get('/descargar-apk', appUpdateController.downloadApk);
 router.get('/download-apk', appUpdateController.downloadApk);
+router.get('/', appUpdateController.downloadApk);
 
-// Registro de nueva versiÃ³n (protegido para administradores)
+// Registro de nueva versión (protegido para administradores)
 router.post(
   '/version-android',
   requireAuth,

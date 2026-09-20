@@ -1,4 +1,4 @@
-﻿import express from 'express';
+import express from 'express';
 import helmet from 'helmet';
 import cors from 'cors';
 import morgan from 'morgan';
@@ -7,6 +7,7 @@ import path from 'path';
 
 import { env } from './config/env.js';
 import routes from './routes/index.js';
+import appUpdateRoutes from './routes/app_update.routes.js';
 import { notFoundHandler, errorHandler } from './middleware/error.middleware.js';
 
 const app = express();
@@ -30,13 +31,17 @@ app.use(
   }),
 );
 
-// Servicio de archivos estáticos para imágenes de activos en src/image
+// Servicio de archivos est�ticos para im�genes de activos en src/image
 const imageDir = path.join(process.cwd(), 'src', 'image');
 app.use('/image', express.static(imageDir, { maxAge: '7d' }));
 
+// Rutas directas para descarga de APK desde el navegador o la app
+app.use('/app', appUpdateRoutes);
+app.use('/apk', appUpdateRoutes);
+
 app.use(express.json({ limit: '3mb' }));
 
-// Solo mostrar en consola solicitudes con error (>= 400), evitando saturación por polling
+// Solo mostrar en consola solicitudes con error (>= 400), evitando saturaci�n por polling
 app.use(
   morgan(env.nodeEnv === 'production' ? 'combined' : 'dev', {
     skip: (_req, res) => res.statusCode < 400,
@@ -56,7 +61,7 @@ const loginLimiter = rateLimit({
   max: env.rateLimit.login.max,
   standardHeaders: true,
   legacyHeaders: false,
-  message: { message: 'Demasiados intentos de inicio de sesión. Espere unos minutos.' },
+  message: { message: 'Demasiados intentos de inicio de sesi�n. Espere unos minutos.' },
 });
 app.use('/api/auth/login', loginLimiter);
 app.use('/api/autenticacion/login', loginLimiter);
@@ -66,7 +71,7 @@ const resetLimiter = rateLimit({
   max: env.rateLimit.passwordReset.max,
   standardHeaders: true,
   legacyHeaders: false,
-  message: { message: 'Demasiadas solicitudes de restablecimiento de contraseña. Espere unos minutos.' },
+  message: { message: 'Demasiadas solicitudes de restablecimiento de contrase�a. Espere unos minutos.' },
 });
 app.use('/api/auth/solicitudes-reinicio-password', resetLimiter);
 app.use('/api/autenticacion/solicitudes-reinicio-password', resetLimiter);
