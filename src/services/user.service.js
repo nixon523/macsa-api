@@ -1,5 +1,6 @@
-import { execProc, buildTvp, sql } from '../config/db.js';
+﻿import { execProc, buildTvp, sql } from '../config/db.js';
 import { hashPassword } from '../security/password.js';
+import { ApiError } from '../utils/ApiError.js';
 
 const PERMISSION_COLUMNS = [{ name: 'Valor', type: sql.NVarChar(50) }];
 
@@ -33,7 +34,6 @@ export async function getUserById(userId) {
 
 export async function createUser({ username, displayName, roleCode, password, permissions }) {
   if (!password || typeof password !== 'string' || password.trim().length < 8) {
-    const { ApiError } = await import('../utils/ApiError.js');
     throw ApiError.badRequest('La contraseña debe tener al menos 8 caracteres.');
   }
   const credentials = hashPassword(password);
@@ -69,7 +69,6 @@ export async function updateUser(userId, { displayName, roleCode, newPassword, p
 
   if (newPassword) {
     if (typeof newPassword !== 'string' || newPassword.trim().length < 8) {
-      const { ApiError } = await import('../utils/ApiError.js');
       throw ApiError.badRequest('La nueva contraseña debe tener al menos 8 caracteres.');
     }
     const credentials = hashPassword(newPassword);
