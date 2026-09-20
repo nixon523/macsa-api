@@ -64,18 +64,34 @@ export async function changePassword(userId, currentPassword, newPassword) {
     throw ApiError.notFound('Usuario no encontrado.');
   }
 
-  // Si se envió una contraseña actual explícita y el usuario no está obligado a cambiarla
-  if (currentPassword && !user.MustChangePassword && currentPassword !== newPassword) {
+  // Si el usuario no está en flujo forzado de cambio inicial, currentPassword es estrictamente obligatorio
+  if (!user.MustChangePassword) {
+    if (!currentPassword) {
+      throw ApiError.badRequest('La contraseña actual es obligatoria.');
+    }
     const currentOk = verifyPassword(
       currentPassword,
       user.PasswordSalt,
       user.PasswordHash,
       user.PasswordIterations,
     );
-
     if (!currentOk) {
       throw ApiError.unauthorized('La contraseña actual es incorrecta.');
     }
+  } else if (currentPassword) {
+    const currentOk = verifyPassword(
+      currentPassword,
+      user.PasswordSalt,
+      user.PasswordHash,
+      user.PasswordIterations,
+    );
+    if (!currentOk) {
+      throw ApiError.unauthorized('La contraseña actual es incorrecta.');
+    }
+  }
+
+  if (currentPassword && currentPassword === newPassword) {
+    throw ApiError.badRequest('La nueva contraseña debe ser distinta a la contraseña actual.');
   }
 
   const credentials = hashPassword(newPassword);
@@ -99,12 +115,22 @@ export async function resolvePasswordReset(requestId, targetUserId) {
   const temporaryPassword = generateTemporaryPassword();
   const credentials = hashPassword(temporaryPassword);
 
+  // 1. Asignar nueva clave temporal al usuario
   await execProc('uspUsuarioReiniciarTemporal', {
     UserId: targetUserId,
     PasswordSalt: credentials.salt,
     PasswordHash: credentials.hash,
     PasswordIterations: credentials.iterations,
   });
+
+  // 2. Marcar la solicitud como resuelta
+  if (requestId) {
+    try {
+      await execProc('uspSolicitudReinicioPasswordMarcarResuelta', { RequestId: requestId });
+    } catch {
+      // Si la solicitud ya estaba marcada o no existe registro huérfano, continuar
+    }
+  }
 
   return { temporaryPassword };
 }

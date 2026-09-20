@@ -1,4 +1,4 @@
-const REQUIRED_KEYS = ['DB_SERVER', 'DB_DATABASE', 'DB_USER', 'DB_PASSWORD', 'JWT_SECRET'];
+﻿const REQUIRED_KEYS = ['DB_SERVER', 'DB_DATABASE', 'DB_USER', 'DB_PASSWORD', 'JWT_SECRET'];
 
 const missing = REQUIRED_KEYS.filter((key) => !process.env[key]);
 
@@ -11,6 +11,7 @@ if (missing.length > 0) {
 export const env = {
   nodeEnv: process.env.NODE_ENV ?? 'development',
   port: Number(process.env.PORT ?? 3000),
+  trustProxy: process.env.TRUST_PROXY === 'true' || process.env.TRUST_PROXY === '1' || (process.env.NODE_ENV === 'production' && process.env.TRUST_PROXY !== 'false'),
   db: {
     server: process.env.DB_SERVER,
     database: process.env.DB_DATABASE,
@@ -36,6 +37,10 @@ export const env = {
     login: {
       windowMs: Number(process.env.RATE_LIMIT_LOGIN_WINDOW_MIN ?? 15) * 60 * 1000,
       max: Number(process.env.RATE_LIMIT_LOGIN_MAX ?? 10),
+    },
+    passwordReset: {
+      windowMs: Number(process.env.RATE_LIMIT_RESET_WINDOW_MIN ?? 15) * 60 * 1000,
+      max: Number(process.env.RATE_LIMIT_RESET_MAX ?? 5),
     },
     global: {
       windowMs: Number(process.env.RATE_LIMIT_GLOBAL_WINDOW_MIN ?? 1) * 60 * 1000,

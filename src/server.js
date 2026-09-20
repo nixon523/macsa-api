@@ -1,17 +1,22 @@
-import app from './app.js';
+﻿import app from './app.js';
 import { env } from './config/env.js';
 import { getPool, closePool } from './config/db.js';
 
 async function bootstrap() {
   await getPool();
-  console.log(`[db] Conexión establecida con ${env.db.database} en ${env.db.server}`);
+  console.log([db] Conexión establecida con  en );
 
   const server = app.listen(env.port, () => {
-    console.log(`[api] Macsa CMMS API escuchando en http://localhost:${env.port}/api`);
+    console.log([api] Macsa CMMS API escuchando en http://localhost:/api);
   });
 
+  // Protección DoS / Slowloris para Windows Server / IIS
+  server.headersTimeout = 65000;
+  server.requestTimeout = 60000;
+  server.keepAliveTimeout = 61000;
+
   async function shutdown(signal) {
-    console.log(`\n[${signal}] Cerrando servidor...`);
+    console.log(\n[] Cerrando servidor...);
     server.close();
     await closePool();
     process.exit(0);
