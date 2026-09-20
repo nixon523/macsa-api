@@ -56,3 +56,15 @@ export const toggleAssetStatus = asyncHandler(async (req, res) => {
   await assetService.toggleAssetStatus(req.params.assetCode, req.body, req.user);
   res.json({ message: 'Estado del activo actualizado correctamente.' });
 });
+
+export const uploadAssetImage = asyncHandler(async (req, res) => {
+  if (!req.file) {
+    throw ApiError.badRequest('No se ha proporcionado ningún archivo de imagen.');
+  }
+  const imageUrl = `/image/${req.file.filename}`;
+  res.status(201).json({
+    imageUrl,
+    filename: req.file.filename,
+    size: req.file.size,
+  });
+});

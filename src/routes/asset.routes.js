@@ -5,6 +5,7 @@ import * as assetController from '../controllers/asset.controller.js';
 import { requireAuth } from '../middleware/auth.middleware.js';
 import { requirePermission } from '../middleware/permission.middleware.js';
 import { handleValidationErrors } from '../middleware/validate.middleware.js';
+import { uploadAssetImageMiddleware } from '../middleware/upload.middleware.js';
 import { PERMISSIONS, ASSET_LEVELS, ASSET_STATUSES } from '../security/rolePermissions.js';
 
 const router = Router();
@@ -20,6 +21,20 @@ router.get('/serie/:serial', requirePermission(PERMISSIONS.assetView), assetCont
 router.get('/serial/:serial', requirePermission(PERMISSIONS.assetView), assetController.findBySerial);
 
 router.get('/area/:areaId', requirePermission(PERMISSIONS.assetView), assetController.listAssetsByArea);
+
+// Endpoint de subida de imagen para activos
+router.post(
+  '/upload-imagen',
+  requirePermission(PERMISSIONS.assetCreate),
+  uploadAssetImageMiddleware,
+  assetController.uploadAssetImage,
+);
+router.post(
+  '/upload-image',
+  requirePermission(PERMISSIONS.assetCreate),
+  uploadAssetImageMiddleware,
+  assetController.uploadAssetImage,
+);
 
 router.post(
   '/',

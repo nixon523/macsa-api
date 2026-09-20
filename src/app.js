@@ -3,6 +3,7 @@ import helmet from 'helmet';
 import cors from 'cors';
 import morgan from 'morgan';
 import rateLimit from 'express-rate-limit';
+import path from 'path';
 
 import { env } from './config/env.js';
 import routes from './routes/index.js';
@@ -18,6 +19,7 @@ app.use(
   helmet({
     contentSecurityPolicy: env.nodeEnv === 'production' ? undefined : false,
     crossOriginEmbedderPolicy: false,
+    crossOriginResourcePolicy: { policy: 'cross-origin' },
   }),
 );
 
@@ -27,6 +29,10 @@ app.use(
     credentials: true,
   }),
 );
+
+// Servicio de archivos estáticos para imágenes de activos en src/image
+const imageDir = path.join(process.cwd(), 'src', 'image');
+app.use('/image', express.static(imageDir, { maxAge: '7d' }));
 
 app.use(express.json({ limit: '3mb' }));
 
