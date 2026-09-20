@@ -1,4 +1,4 @@
-﻿import { execProc } from '../config/db.js';
+import { execProc } from '../config/db.js';
 
 export async function getLatestAndroidVersion() {
   const rows = await execProc('uspActualizacionAndroidObtenerUltima');
@@ -10,7 +10,6 @@ export async function getLatestAndroidVersion() {
       version: '1.0.0',
       mandatory: false,
       releaseDate: new Date().toISOString().split('T')[0],
-      downloadUrl: '/api/app/descargar-apk',
     };
   }
 
@@ -19,7 +18,6 @@ export async function getLatestAndroidVersion() {
     version: row.VersionApp,
     mandatory: Boolean(row.Obligatorio),
     releaseDate: row.Fecha ? new Date(row.Fecha).toISOString().split('T')[0] : null,
-    downloadUrl: '/api/app/descargar-apk',
   };
 }
 
