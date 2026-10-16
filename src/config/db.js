@@ -1,5 +1,4 @@
 import sql from 'mssql';
-
 import { env } from './env.js';
 
 export { sql };
@@ -8,14 +7,24 @@ let poolPromise = null;
 
 export function getPool() {
   if (!poolPromise) {
-    poolPromise = new sql.ConnectionPool({
+    const config = {
       server: env.db.server,
+      port: Number(env.db.port) || 1433,
       database: env.db.database,
       user: env.db.user,
       password: env.db.password,
-      options: env.db.options,
+      options: {
+        port: Number(env.db.port) || 1433,
+        encrypt: env.db.options.encrypt,
+        trustServerCertificate: env.db.options.trustServerCertificate,
+        enableArithAbort: true,
+      },
       pool: env.db.pool,
-    })
+    };
+
+    console.log(`[db] Intentando conectar a SQL Server en ${config.server}:${config.port} (BD: ${config.database}, Usuario: ${config.user})...`);
+
+    poolPromise = new sql.ConnectionPool(config)
       .connect()
       .catch((error) => {
         poolPromise = null;

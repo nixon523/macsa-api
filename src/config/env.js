@@ -1,4 +1,4 @@
-﻿const REQUIRED_KEYS = ['DB_SERVER', 'DB_DATABASE', 'DB_USER', 'DB_PASSWORD', 'JWT_SECRET'];
+const REQUIRED_KEYS = ['DB_SERVER', 'DB_DATABASE', 'DB_USER', 'DB_PASSWORD', 'JWT_SECRET'];
 
 const missing = REQUIRED_KEYS.filter((key) => !process.env[key]);
 
@@ -8,16 +8,20 @@ if (missing.length > 0) {
   );
 }
 
+const dbPort = process.env.DB_PORT ? Number(process.env.DB_PORT) : undefined;
+
 export const env = {
   nodeEnv: process.env.NODE_ENV ?? 'development',
   port: Number(process.env.PORT ?? 3000),
   trustProxy: process.env.TRUST_PROXY === 'true' || process.env.TRUST_PROXY === '1' || (process.env.NODE_ENV === 'production' && process.env.TRUST_PROXY !== 'false'),
   db: {
     server: process.env.DB_SERVER,
+    port: dbPort,
     database: process.env.DB_DATABASE,
     user: process.env.DB_USER,
     password: process.env.DB_PASSWORD,
     options: {
+      port: dbPort,
       encrypt: process.env.DB_ENCRYPT === 'true',
       trustServerCertificate: process.env.DB_TRUST_SERVER_CERTIFICATE !== 'false',
       enableArithAbort: true,
