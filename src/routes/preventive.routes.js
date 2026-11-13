@@ -1,9 +1,9 @@
-import { Router } from 'express';
+﻿import { Router } from 'express';
 import { body } from 'express-validator';
 
 import * as preventiveController from '../controllers/preventive.controller.js';
 import { requireAuth } from '../middleware/auth.middleware.js';
-import { requirePermission } from '../middleware/permission.middleware.js';
+import { requirePermission, requireAnyPermission } from '../middleware/permission.middleware.js';
 import { handleValidationErrors } from '../middleware/validate.middleware.js';
 import {
   PERMISSIONS,
@@ -16,17 +16,14 @@ const router = Router();
 
 router.use(requireAuth);
 
-router.get(
-  '/',
-  requirePermission(PERMISSIONS.preventiveView),
-  preventiveController.listPreventiveSchedules,
+const canManagePreventive = requireAnyPermission(
+  PERMISSIONS.preventiveManage,
+  PERMISSIONS.workOrderCreate,
+  PERMISSIONS.assetEdit,
 );
 
-router.get(
-  '/indicadores',
-  requirePermission(PERMISSIONS.preventiveView),
-  preventiveController.getPreventiveIndicators,
-);
+router.get('/', requirePermission(PERMISSIONS.preventiveView), preventiveController.listPreventiveSchedules);
+router.get('/indicadores', requirePermission(PERMISSIONS.preventiveView), preventiveController.getPreventiveIndicators);
 
 const materialRules = body('materials').optional().isArray().custom((materials) => {
   for (const material of materials ?? []) {
@@ -40,7 +37,7 @@ const materialRules = body('materials').optional().isArray().custom((materials) 
 
 router.post(
   '/',
-  requirePermission(PERMISSIONS.workOrderCreate),
+  canManagePreventive,
   body('title').optional({ values: 'falsy' }).isString().trim(),
   body('assetCode').isString().trim().notEmpty().withMessage('El activo es obligatorio.'),
   body('areaId').optional({ values: 'falsy' }).isString().trim(),
@@ -52,11 +49,11 @@ router.post(
     .custom((val) => {
       const match = PREVENTIVE_FREQUENCIES.some((f) => f.toLowerCase() === val.toLowerCase());
       if (!match) {
-        throw new Error(`Frecuencia inv�lida. Valores: ${PREVENTIVE_FREQUENCIES_CATALOG.map((f) => f.label).join(', ')}`);
+        throw new Error(`Frecuencia inválida. Valores: ${PREVENTIVE_FREQUENCIES_CATALOG.map((f) => f.label).join(', ')}`);
       }
       return true;
     }),
-  body('startDate').isISO8601().withMessage('startDate debe ser una fecha v�lida.'),
+  body('startDate').isISO8601().withMessage('startDate debe ser una fecha válida.'),
   body('activities').optional().isArray(),
   body('actividades').optional().isArray(),
   body('intervaloFrecuencia').optional().isInt({ min: 1 }),
@@ -66,21 +63,12 @@ router.post(
   preventiveController.createPreventiveSchedule,
 );
 
-router.post(
-  '/generar-ots-masivas',
-  requirePermission(PERMISSIONS.workOrderCreate),
-  preventiveController.generateBatchMonthlyWorkOrders,
-);
-
-router.post(
-  '/:id/generar-ot-mes',
-  requirePermission(PERMISSIONS.workOrderCreate),
-  preventiveController.generateMonthlyWorkOrder,
-);
+router.post('/generar-ots-masivas', canManagePreventive, preventiveController.generateBatchMonthlyWorkOrders);
+router.post('/:id/generar-ot-mes', canManagePreventive, preventiveController.generateMonthlyWorkOrder);
 
 router.put(
   '/:id',
-  requirePermission(PERMISSIONS.assetEdit),
+  canManagePreventive,
   body('amendmentDocNumber').optional({ values: 'falsy' }).isString().trim(),
   materialRules,
   handleValidationErrors,
@@ -88,7 +76,7 @@ router.put(
 );
 
 const executionValidators = [
-  requirePermission(PERMISSIONS.workOrderCreate),
+  canManagePreventive,
   body('workOrderId').isString().trim().notEmpty().withMessage('La OT es obligatoria.'),
   handleValidationErrors,
   preventiveController.recordExecution,
@@ -97,12 +85,12 @@ router.post('/:id/ejecuciones', ...executionValidators);
 router.post('/:id/executions', ...executionValidators);
 
 const statusValidators = [
-  requirePermission(PERMISSIONS.assetEdit),
+  canManagePreventive,
   body('newStatus')
     .custom((val) => {
       const match = PREVENTIVE_STATUSES.some((s) => s.toLowerCase() === (val ?? '').toString().toLowerCase());
       if (!match) {
-        throw new Error(`Estado inv�lido. Valores: ${PREVENTIVE_STATUSES.join(', ')}`);
+        throw new Error(`Estado inválido. Valores: ${PREVENTIVE_STATUSES.join(', ')}`);
       }
       return true;
     }),

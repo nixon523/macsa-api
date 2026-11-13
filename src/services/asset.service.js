@@ -14,11 +14,13 @@ export async function getAssetsByArea(areaId, includeAll = false) {
   return execProc('uspActivoObtenerRaicesPorArea', { AreaId: areaId });
 }
 
-export async function searchAssets(query, areaId = null, status = null) {
+export async function searchAssets(query, areaId = null, status = null, { limit = 200, offset = 0 } = {}) {
   return execProc('uspActivoBuscar', { 
     Query: query || '',
     AreaId: areaId || null,
     Status: status || null,
+    Limit: limit ?? 200,
+    Offset: offset ?? 0,
   });
 }
 

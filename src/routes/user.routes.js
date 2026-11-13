@@ -21,6 +21,7 @@ router.post(
   body('roleCode').isIn(VALID_ROLES).withMessage('El rol especificado no es válido.'),
   body('password').isString().isLength({ min: 8 }).withMessage('La contraseña debe tener al menos 8 caracteres.'),
   body('permissions').optional().isArray(),
+  body('employeeId').optional({ nullable: true }).isInt({ min: 1 }),
   handleValidationErrors,
   userController.createUser,
 );
@@ -31,6 +32,7 @@ router.put(
   body('roleCode').optional().isIn(VALID_ROLES).withMessage('El rol especificado no es válido.'),
   body('newPassword').optional({ values: 'falsy' }).isString().isLength({ min: 8 }).withMessage('La nueva contraseña debe tener al menos 8 caracteres.'),
   body('permissions').optional().isArray(),
+  body('employeeId').optional({ nullable: true }).isInt({ min: 1 }),
   handleValidationErrors,
   userController.updateUser,
 );

@@ -1,4 +1,5 @@
 ﻿import { execProc, buildTvp, typed, sql } from '../config/db.js';
+import { parsePagination } from '../utils/pagination.js';
 
 const MATERIAL_COLUMNS = [
   { name: 'LineNum', type: sql.Int },
@@ -30,10 +31,14 @@ function workTypesTvp(workTypes = []) {
   return buildTvp('TipoListaTexto', WORK_TYPE_COLUMNS, rows);
 }
 
-export async function getAllWorkOrders({ status, area } = {}) {
+export async function getAllWorkOrders(query = {}) {
+  const { status, area } = query;
+  const { limit, offset } = parsePagination(query);
   return execProc('uspOrdenTrabajoObtenerTodas', {
     StatusFilter: status || null,
     AreaFilter: area || null,
+    Limit: limit,
+    Offset: offset,
   });
 }
 

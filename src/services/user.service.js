@@ -32,12 +32,16 @@ export async function getUserById(userId) {
   return mapUserRow(rows[0]) ?? null;
 }
 
-export async function createUser({ username, displayName, roleCode, password, permissions }) {
+export async function createUser({ username, displayName, roleCode, password, permissions, employeeId }) {
   if (!password || typeof password !== 'string' || password.trim().length < 8) {
     throw ApiError.badRequest('La contraseña debe tener al menos 8 caracteres.');
   }
   const credentials = hashPassword(password);
   const perms = Array.isArray(permissions) ? permissions : [];
+  const parsedEmployeeId = employeeId !== undefined && employeeId !== null && employeeId !== ''
+    ? Number(employeeId)
+    : null;
+
   const inputs = {
     Username: username,
     DisplayName: displayName,
@@ -48,13 +52,18 @@ export async function createUser({ username, displayName, roleCode, password, pe
     MustChangePassword: 1,
     HasCustomPermissions: perms.length > 0 ? 1 : 0,
     Permissions: permissionsTvp(perms),
+    EmployeeId: Number.isFinite(parsedEmployeeId) ? parsedEmployeeId : null,
   };
 
   return execProc('uspUsuarioCrear', inputs);
 }
 
-export async function updateUser(userId, { displayName, roleCode, newPassword, permissions }) {
+export async function updateUser(userId, { displayName, roleCode, newPassword, permissions, employeeId }) {
   const perms = Array.isArray(permissions) ? permissions : [];
+  const parsedEmployeeId = employeeId !== undefined && employeeId !== null && employeeId !== ''
+    ? Number(employeeId)
+    : null;
+
   const inputs = {
     UserId: userId,
     DisplayName: displayName ?? undefined,
@@ -65,6 +74,7 @@ export async function updateUser(userId, { displayName, roleCode, newPassword, p
     MustChangePassword: undefined,
     HasCustomPermissions: Array.isArray(permissions) ? 1 : 0,
     Permissions: permissionsTvp(perms),
+    EmployeeId: Number.isFinite(parsedEmployeeId) ? parsedEmployeeId : null,
   };
 
   if (newPassword) {

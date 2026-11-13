@@ -1,4 +1,4 @@
-export const PERMISSIONS = {
+Ôªøexport const PERMISSIONS = {
   dashboardView: 'dashboard.view',
   assetView: 'asset.view',
   assetCreate: 'asset.create',
@@ -10,14 +10,18 @@ export const PERMISSIONS = {
   workOrderCreate: 'work_order.create',
   workOrderPrint: 'work_order.print',
   preventiveView: 'preventive.view',
+  preventiveManage: 'preventive.manage',
   kardexView: 'kardex.view',
   breakdownReport: 'breakdown.report',
   breakdownView: 'breakdown.view',
   breakdownManage: 'breakdown.manage',
+  operationReportView: 'operation_report.view',
+  operationReportEdit: 'operation_report.edit',
+  employeeManage: 'employee.manage',
   userManage: 'user.manage',
 };
 
-export const VALID_ROLES = ['admin', 'jefe', 'reportador', 'lector'];
+export const VALID_ROLES = ['admin', 'jefe', 'jefe_area', 'reportador', 'lector'];
 
 export const ASSET_LEVELS = ['equipment', 'subEquipment', 'part', 'subPart'];
 
@@ -32,10 +36,10 @@ export const BREAKDOWN_SEVERITIES = ['low', 'medium', 'high', 'critical'];
 export const BREAKDOWN_STATUSES = ['pending', 'inProgress', 'resolved', 'rejected'];
 
 export const MAINTENANCE_TYPES = [
-  'Mec·nico',
-  'ElÈctrico',
-  'ElectrÛnico',
-  'InspecciÛn y LubricaciÛn',
+  'Mec√°nico',
+  'El√©ctrico',
+  'Electr√≥nico',
+  'Inspecci√≥n y Lubricaci√≥n',
   'Otro',
   'mechanical',
   'electrical',
@@ -89,22 +93,47 @@ const ROLE_DEFAULT_PERMISSIONS = {
   jefe: [
     PERMISSIONS.dashboardView,
     PERMISSIONS.assetView,
+    PERMISSIONS.assetCreate,
+    PERMISSIONS.assetEdit,
+    PERMISSIONS.assetTransfer,
+    PERMISSIONS.assetDeleteRequest,
     PERMISSIONS.workOrderView,
     PERMISSIONS.workOrderCreate,
     PERMISSIONS.workOrderPrint,
     PERMISSIONS.preventiveView,
+    PERMISSIONS.preventiveManage,
     PERMISSIONS.kardexView,
+    PERMISSIONS.breakdownReport,
     PERMISSIONS.breakdownView,
     PERMISSIONS.breakdownManage,
+    PERMISSIONS.operationReportView,
+    PERMISSIONS.operationReportEdit,
+    PERMISSIONS.employeeManage,
   ],
-  reportador: [PERMISSIONS.breakdownReport, PERMISSIONS.breakdownView],
+  jefe_area: [
+    PERMISSIONS.dashboardView,
+    PERMISSIONS.assetView,
+    PERMISSIONS.workOrderView,
+    PERMISSIONS.workOrderPrint,
+    PERMISSIONS.preventiveView,
+    PERMISSIONS.breakdownReport,
+    PERMISSIONS.breakdownView,
+    PERMISSIONS.operationReportView,
+    PERMISSIONS.operationReportEdit,
+  ],
+  reportador: [
+    PERMISSIONS.breakdownReport,
+    PERMISSIONS.breakdownView,
+  ],
   lector: [
     PERMISSIONS.dashboardView,
     PERMISSIONS.assetView,
     PERMISSIONS.workOrderView,
+    PERMISSIONS.workOrderPrint,
     PERMISSIONS.preventiveView,
     PERMISSIONS.kardexView,
     PERMISSIONS.breakdownView,
+    PERMISSIONS.operationReportView,
   ],
 };
 

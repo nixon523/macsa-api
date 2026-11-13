@@ -3,7 +3,7 @@ import { body, query } from 'express-validator';
 
 import * as orController from '../controllers/operationReport.controller.js';
 import { requireAuth } from '../middleware/auth.middleware.js';
-import { requirePermission } from '../middleware/permission.middleware.js';
+import { requirePermission, requireAnyPermission } from '../middleware/permission.middleware.js';
 import { handleValidationErrors } from '../middleware/validate.middleware.js';
 import { PERMISSIONS } from '../security/rolePermissions.js';
 
@@ -11,15 +11,20 @@ const router = Router();
 
 router.use(requireAuth);
 
-// --- Equipos de proceso ---
-// Listar equipos de proceso (lectura: asset.view)
-router.get(
-  '/equipos',
-  requirePermission(PERMISSIONS.assetView),
-  orController.listarEquipos,
+const canViewOperationReports = requireAnyPermission(
+  PERMISSIONS.operationReportView,
+  PERMISSIONS.assetView,
+  PERMISSIONS.dashboardView,
 );
 
-// Marcar/desmarcar como equipo de proceso (edición: asset.edit)
+const canEditOperationReports = requireAnyPermission(
+  PERMISSIONS.operationReportEdit,
+  PERMISSIONS.assetEdit,
+);
+
+// --- Equipos de proceso ---
+router.get('/equipos', canViewOperationReports, orController.listarEquipos);
+
 router.patch(
   '/equipos/:codigoActivo/proceso',
   requirePermission(PERMISSIONS.assetEdit),
@@ -29,10 +34,9 @@ router.patch(
 );
 
 // --- Reportes de operación ---
-// Registrar/actualizar reporte de un día (requiere permiso especial o asset.edit)
 router.post(
   '/',
-  requirePermission(PERMISSIONS.assetEdit),
+  canEditOperationReports,
   body('codigoActivo').isString().notEmpty().withMessage('codigoActivo es obligatorio.'),
   body('fechaOperacion').isDate().withMessage('fechaOperacion debe ser una fecha válida (YYYY-MM-DD).'),
   body('horasOperacion').isFloat({ min: 0, max: 24 }).withMessage('horasOperacion debe ser entre 0 y 24.'),
@@ -42,32 +46,32 @@ router.post(
   body('horasParoMantCorr').optional().isFloat({ min: 0 }),
   body('horasParoPlanificado').optional().isFloat({ min: 0 }),
   body('horasParoExterno').optional().isFloat({ min: 0 }),
+  body('unidadesProducidas').optional({ nullable: true }).isFloat({ min: 0 }),
+  body('unidadesEsperadas').optional({ nullable: true }).isFloat({ min: 0 }),
+  body('unidadesConformes').optional({ nullable: true }).isFloat({ min: 0 }),
+  body('rendimientoDirectoPct').optional({ nullable: true }).isFloat({ min: 0, max: 100 }),
+  body('calidadDirectoPct').optional({ nullable: true }).isFloat({ min: 0, max: 100 }),
   handleValidationErrors,
   orController.registrarReporte,
 );
 
-// Reportes históricos por activo
-router.get(
-  '/activo/:codigoActivo',
-  requirePermission(PERMISSIONS.assetView),
-  orController.obtenerPorActivo,
-);
+// --- Reportería y Analítica Avanzada ---
+router.get('/analitica/historial-activo/:codigoActivo', canViewOperationReports, orController.obtenerHistorialActivo);
+router.get('/analitica/estacionalidad', canViewOperationReports, orController.obtenerEstacionalidad);
+router.get('/analitica/top-fallas', canViewOperationReports, orController.obtenerTopFallas);
+router.get('/analitica/consumo-repuestos', canViewOperationReports, orController.obtenerConsumoRepuestos);
+router.get('/analitica/oee-general', canViewOperationReports, orController.obtenerOEEGeneral);
+router.get('/activo/:codigoActivo', canViewOperationReports, orController.obtenerPorActivo);
 
-// Reporte semanal por área
 router.get(
   '/semana',
-  requirePermission(PERMISSIONS.assetView),
+  canViewOperationReports,
   query('areaId').notEmpty().withMessage('areaId es obligatorio.'),
   query('lunes').isDate().withMessage('lunes debe ser una fecha válida (YYYY-MM-DD).'),
   handleValidationErrors,
   orController.obtenerPorSemana,
 );
 
-// Métricas de disponibilidad por activo
-router.get(
-  '/metricas/:codigoActivo',
-  requirePermission(PERMISSIONS.assetView),
-  orController.obtenerMetricas,
-);
+router.get('/metricas/:codigoActivo', canViewOperationReports, orController.obtenerMetricas);
 
 export default router;

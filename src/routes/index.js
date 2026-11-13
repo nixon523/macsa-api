@@ -12,6 +12,8 @@ import kardexRoutes from './kardex.routes.js';
 import dashboardRoutes from './dashboard.routes.js';
 import operationReportRoutes from './operationReport.routes.js';
 import appUpdateRoutes from './app_update.routes.js';
+import employeeRoutes from './employee.routes.js';
+import catalogRoutes from './catalog.routes.js';
 
 const router = Router();
 
@@ -31,6 +33,8 @@ router.use('/planes-preventivos', preventiveRoutes);
 router.use('/kardex', kardexRoutes);
 router.use('/dashboard', dashboardRoutes);
 router.use('/reportes-operacion', operationReportRoutes);
+router.use('/empleados', employeeRoutes);
+router.use('/catalogos', catalogRoutes);
 router.use('/app', appUpdateRoutes);
 router.use('/aplicacion', appUpdateRoutes);
 
@@ -42,5 +46,7 @@ router.use('/deletion-requests', deletionRequestRoutes);
 router.use('/work-orders', workOrderRoutes);
 router.use('/breakdown-reports', breakdownRoutes);
 router.use('/preventive-schedules', preventiveRoutes);
+router.use('/employees', employeeRoutes);
+router.use('/catalogs', catalogRoutes);
 
 export default router;

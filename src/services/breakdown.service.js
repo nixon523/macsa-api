@@ -1,4 +1,5 @@
 ﻿import { execProc, typed, sql } from '../config/db.js';
+import { parsePagination } from '../utils/pagination.js';
 
 function toDateOrNull(value) {
   if (!value) return null;
@@ -6,11 +7,15 @@ function toDateOrNull(value) {
   return Number.isNaN(date.getTime()) ? null : date;
 }
 
-export async function getAllBreakdownReports({ status, startDate, endDate } = {}) {
+export async function getAllBreakdownReports(query = {}) {
+  const { status, startDate, endDate } = query;
+  const { limit, offset } = parsePagination(query);
   return execProc('uspReporteAveriaObtenerTodos', {
     StatusFilter: status || null,
     StartDate: typed(sql.DateTime2, toDateOrNull(startDate)),
     EndDate: typed(sql.DateTime2, toDateOrNull(endDate)),
+    Limit: limit,
+    Offset: offset,
   });
 }
 
@@ -23,6 +28,13 @@ export async function getBreakdownReportsByUser(userId) {
 }
 
 export async function createBreakdownReport(payload, user) {
+  const image =
+    payload.imageData ||
+    payload.imagenUrl ||
+    payload.imageUrl ||
+    payload.imagen ||
+    null;
+
   return execProc('uspReporteAveriaCrear', {
     AssetCode: payload.assetCode,
     AssetName: payload.assetName,
@@ -31,6 +43,7 @@ export async function createBreakdownReport(payload, user) {
     Severity: payload.severity,
     ReporterUserId: user.userId,
     ReporterUserName: user.displayName,
+    ImageData: image ? typed(sql.NVarChar(sql.MAX), image) : null,
   });
 }
 

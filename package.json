@@ -10,6 +10,7 @@
   "scripts": {
     "start": "node --env-file=.env src/server.js",
     "dev": "node --watch --env-file=.env src/server.js",
+    "test": "node --env-file=.env --test test/*.test.mjs",
     "prod": "pm2 start src/server.js --name macsa-api --node-args=\"--env-file=.env\"",
     "prod:stop": "pm2 stop macsa-api",
     "prod:restart": "pm2 restart macsa-api",

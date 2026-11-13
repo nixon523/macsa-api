@@ -6,8 +6,8 @@ async function bootstrap() {
   await getPool();
   console.log(`[db] Conexión establecida con ${env.db.database} en ${env.db.server}`);
 
-  const server = app.listen(env.port, () => {
-    console.log(`[api] Macsa CMMS API escuchando en http://localhost:${env.port}/api`);
+  const server = app.listen(env.port, '0.0.0.0', () => {
+    console.log(`[api] Macsa CMMS API escuchando en http://0.0.0.0:${env.port}/api`);
   });
 
   // Protección DoS / Slowloris para Windows Server / IIS

@@ -1,6 +1,7 @@
 ﻿import asyncHandler from '../utils/asyncHandler.js';
 import * as assetService from '../services/asset.service.js';
 import { ApiError } from '../utils/ApiError.js';
+import { parsePagination } from '../utils/pagination.js';
 
 export const listAssetsByParent = asyncHandler(async (req, res) => {
   const parent = req.query.parent || req.query.parentAssetCode || req.query.parentAssetId || null;
@@ -17,7 +18,8 @@ export const searchAssets = asyncHandler(async (req, res) => {
   const query = req.query.q || '';
   const areaId = req.query.areaId || req.query.area || null;
   const status = req.query.status || null;
-  res.json(await assetService.searchAssets(query.trim(), areaId, status));
+  const { limit, offset } = parsePagination(req.query, { defaultLimit: 200, maxLimit: 1000 });
+  res.json(await assetService.searchAssets(query.trim(), areaId, status, { limit, offset }));
 });
 
 export const findBySerial = asyncHandler(async (req, res) => {

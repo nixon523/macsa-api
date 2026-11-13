@@ -1,4 +1,4 @@
-﻿import asyncHandler from '../utils/asyncHandler.js';
+import asyncHandler from '../utils/asyncHandler.js';
 import * as orService from '../services/operationReport.service.js';
 
 // POST /reportes-operacion  (crear o actualizar reporte de un día)
@@ -57,4 +57,73 @@ export const toggleEquipoProceso = asyncHandler(async (req, res) => {
   }
   const result = await orService.actualizarEsEquipoProceso(codigoActivo, esEquipoProceso, req.user);
   res.json(result[0] ?? result);
+});
+
+// GET /reportes-operacion/analitica/historial-activo/:codigoActivo
+export const obtenerHistorialActivo = asyncHandler(async (req, res) => {
+  const { codigoActivo } = req.params;
+  const { fechaDesde, fechaHasta, incluirHijos } = req.query;
+  const resultSets = await orService.obtenerHistorialActivo(codigoActivo, {
+    fechaDesde,
+    fechaHasta,
+    incluirHijos: incluirHijos !== 'false' && incluirHijos !== '0',
+  });
+
+  // Los SPs con múltiples SELECTs devuelven un array de arrays en mssql/execProc
+  const resumen = Array.isArray(resultSets[0]) ? resultSets[0][0] : resultSets[0] || {};
+  const timeline = Array.isArray(resultSets[1]) ? resultSets[1] : [];
+  const repuestos = Array.isArray(resultSets[2]) ? resultSets[2] : [];
+
+  res.json({
+    resumen,
+    timeline,
+    repuestos,
+  });
+});
+
+// GET /reportes-operacion/analitica/estacionalidad?areaId=A001&anio=2026
+export const obtenerEstacionalidad = asyncHandler(async (req, res) => {
+  const { areaId, anio } = req.query;
+  const result = await orService.obtenerEstacionalidadAverias({
+    areaId: areaId || null,
+    anio:   anio ? parseInt(anio, 10) : null,
+  });
+  res.json(result);
+});
+
+// GET /reportes-operacion/analitica/top-fallas?areaId=A001&fechaDesde=2026-01-01&fechaHasta=2026-12-31&top=10
+export const obtenerTopFallas = asyncHandler(async (req, res) => {
+  const { areaId, fechaDesde, fechaHasta, top } = req.query;
+  const result = await orService.obtenerTopEquiposFallas({
+    areaId:     areaId || null,
+    fechaDesde: fechaDesde || null,
+    fechaHasta: fechaHasta || null,
+    top:        top ? parseInt(top, 10) : 10,
+  });
+  res.json(result);
+});
+
+// GET /reportes-operacion/analitica/consumo-repuestos?areaId=A001&codigoActivo=A001-001&top=20
+export const obtenerConsumoRepuestos = asyncHandler(async (req, res) => {
+  const { areaId, codigoActivo, fechaDesde, fechaHasta, top } = req.query;
+  const result = await orService.obtenerConsumoRepuestos({
+    areaId:       areaId || null,
+    codigoActivo: codigoActivo || null,
+    fechaDesde:   fechaDesde || null,
+    fechaHasta:   fechaHasta || null,
+    top:          top ? parseInt(top, 10) : 20,
+  });
+  res.json(result);
+});
+
+// GET /reportes-operacion/analitica/oee-general?areaId=A001&fechaDesde=2026-01-01&fechaHasta=2026-12-31
+export const obtenerOEEGeneral = asyncHandler(async (req, res) => {
+  const { areaId, codigoActivo, fechaDesde, fechaHasta } = req.query;
+  const result = await orService.obtenerOEEGeneral({
+    areaId:       areaId || null,
+    codigoActivo: codigoActivo || null,
+    fechaDesde:   fechaDesde || null,
+    fechaHasta:   fechaHasta || null,
+  });
+  res.json(result);
 });
