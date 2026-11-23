@@ -35,7 +35,7 @@ export async function login(username, password) {
     throw ApiError.unauthorized(
       remaining > 0
         ? `Credenciales inválidas. Intentos restantes: ${remaining}.`
-        : 'Credenciales inválidas. La cuenta queda bloqueada por 5 minutos.',
+        : 'Credenciales inválidas. La cuenta queda bloqueada por 15 minutos.',
     );
   }
 
@@ -137,4 +137,29 @@ export async function resolvePasswordReset(requestId, targetUserId) {
   }
 
   return { temporaryPassword };
+}
+
+export async function registerSession(userId, tokenId, ip = null, userAgent = null) {
+  return execProc('uspSesionRegistrar', {
+    UsuarioId: userId,
+    TokenId: tokenId,
+    IpOrigen: ip,
+    UserAgent: userAgent,
+  });
+}
+
+export async function isSessionActive(userId, tokenId) {
+  const rows = await execProc('uspSesionVerificar', {
+    UsuarioId: userId,
+    TokenId: tokenId,
+  });
+  if (!rows || rows.length === 0) return false;
+  return Boolean(rows[0].Activa);
+}
+
+export async function closeSession(userId, tokenId) {
+  return execProc('uspSesionCerrar', {
+    UsuarioId: userId,
+    TokenId: tokenId,
+  });
 }

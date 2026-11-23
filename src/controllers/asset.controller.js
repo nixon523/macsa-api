@@ -59,6 +59,21 @@ export const toggleAssetStatus = asyncHandler(async (req, res) => {
   res.json({ message: 'Estado del activo actualizado correctamente.' });
 });
 
+export const cloneAssetTree = asyncHandler(async (req, res) => {
+  const { targetAreaId, newRootName, newSerial, observations, copyAttributes } = req.body;
+  if (!targetAreaId) {
+    throw ApiError.badRequest('El área de destino es obligatoria.');
+  }
+  const result = await assetService.cloneAssetTree(req.params.assetCode, {
+    targetAreaId,
+    newRootName,
+    newSerial,
+    observations,
+    copyAttributes,
+  }, req.user);
+  res.status(201).json(result[0] ?? { success: true });
+});
+
 export const uploadAssetImage = asyncHandler(async (req, res) => {
   if (!req.file) {
     throw ApiError.badRequest('No se ha proporcionado ningún archivo de imagen.');

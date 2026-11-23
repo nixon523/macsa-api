@@ -1,7 +1,8 @@
 import { verifyToken } from '../security/jwt.js';
 import { ApiError } from '../utils/ApiError.js';
+import * as authService from '../services/auth.service.js';
 
-export function requireAuth(req, _res, next) {
+export async function requireAuth(req, _res, next) {
   const header = req.headers.authorization ?? '';
   const [scheme, token] = header.split(' ');
 
@@ -18,8 +19,29 @@ export function requireAuth(req, _res, next) {
       role: payload.role,
       permissions: payload.permissions ?? [],
     };
+    req.sessionTokenId = payload.jti;
+
+    // Control de concurrencia: si el token tiene identificador de sesión, verificar si sigue activa
+    if (payload.jti && payload.sub) {
+      try {
+        const active = await authService.isSessionActive(payload.sub, payload.jti);
+        if (!active) {
+          return next(
+            ApiError.unauthorized(
+              'Tu sesión ha finalizado porque se inició sesión en otro dispositivo (máximo 2 sesiones permitidas).',
+              'SESSION_SUPERSEDED',
+            ),
+          );
+        }
+      } catch (err) {
+        // Si hay una falla transitoria al consultar BD, loggear y permitir continuar
+        console.warn('[auth] Advertencia al verificar sesion activa:', err.message);
+      }
+    }
+
     return next();
-  } catch {
+  } catch (err) {
+    if (err instanceof ApiError) return next(err);
     return next(ApiError.unauthorized('Token inválido o expirado.'));
   }
 }

@@ -27,6 +27,7 @@ router.post('/password-reset-requests', ...resetRequestValidators);
 
 router.get('/yo', requireAuth, authController.me);
 router.get('/me', requireAuth, authController.me);
+router.post('/logout', requireAuth, authController.logout);
 
 const changePasswordValidators = [
   requireAuth,

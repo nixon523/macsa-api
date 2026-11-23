@@ -1,4 +1,6 @@
-﻿import asyncHandler from '../utils/asyncHandler.js';
+﻿import crypto from 'node:crypto';
+
+import asyncHandler from '../utils/asyncHandler.js';
 import * as authService from '../services/auth.service.js';
 import { signToken } from '../security/jwt.js';
 import { rolePermissions } from '../security/rolePermissions.js';
@@ -11,8 +13,19 @@ export const login = asyncHandler(async (req, res) => {
     ? user.permissions
     : rolePermissions(user.roleCode);
 
+  const sessionId = crypto.randomUUID();
+  const ip = req.ip || req.connection?.remoteAddress || null;
+  const userAgent = req.headers['user-agent'] ? String(req.headers['user-agent']).substring(0, 255) : null;
+
+  try {
+    await authService.registerSession(user.userId, sessionId, ip, userAgent);
+  } catch (err) {
+    console.error('[auth] Error al registrar sesion concurrente:', err);
+  }
+
   const token = signToken({
     sub: user.userId,
+    jti: sessionId,
     username: user.username,
     displayName: user.displayName,
     role: user.roleCode,
@@ -20,6 +33,17 @@ export const login = asyncHandler(async (req, res) => {
   });
 
   res.json({ token, user: { ...user, permissions: effectivePermissions } });
+});
+
+export const logout = asyncHandler(async (req, res) => {
+  if (req.user?.userId && req.sessionTokenId) {
+    try {
+      await authService.closeSession(req.user.userId, req.sessionTokenId);
+    } catch (err) {
+      console.error('[auth] Error al cerrar sesion:', err);
+    }
+  }
+  res.json({ message: 'Sesión cerrada exitosamente.' });
 });
 
 export const me = asyncHandler(async (req, res) => {

@@ -48,19 +48,19 @@ export async function getOpenWorkOrders() {
 
 export async function createWorkOrder(payload, user) {
   return execProc('uspOrdenTrabajoCrear', {
-    AssetCode: payload.assetCode,
-    AssetName: payload.assetName,
-    AreaId: payload.areaId,
-    AreaName: payload.areaName,
+    AssetCode: payload.assetCode ? payload.assetCode.trim() : null,
+    AssetName: payload.assetName ? payload.assetName.trim() : null,
+    AreaId: payload.areaId ? payload.areaId.trim() : null,
+    AreaName: payload.areaName ? payload.areaName.trim() : null,
     Description: payload.description,
-    Priority: payload.priority,
+    Priority: payload.priority || 'medium',
     AssignedTo: payload.assignedTo ?? null,
     AssignedStaffCount: payload.assignedStaffCount ?? null,
     EstimatedHours: payload.estimatedHours ?? null,
     ScheduledDate: typed(sql.DateTime2, toDateOrNull(payload.scheduledDate)),
     ReportId: payload.reportId ?? null,
     CreatedByUserId: user.userId,
-    CreatedByUserName: user.displayName,
+    CreatedByUserName: user.username || user.displayName || 'SISTEMA',
     Materials: materialsTvp(payload.materials),
     WorkTypes: workTypesTvp(payload.workTypes),
   });
@@ -71,7 +71,7 @@ export async function updateWorkOrderStatus(workOrderId, newStatus, user) {
     WorkOrderId: workOrderId,
     NewStatus: newStatus,
     UserId: user.userId,
-    UserName: user.displayName,
+    UserName: user.username || user.displayName || 'SISTEMA',
   });
 }
 
@@ -92,7 +92,7 @@ export async function updateWorkOrderDetails(workOrderId, payload, user) {
     MaintenanceResponsible: payload.maintenanceResponsible ?? null,
     ScheduledDate: typed(sql.DateTime2, toDateOrNull(payload.scheduledDate)),
     UserId: user.userId,
-    UserName: user.displayName,
+    UserName: user.username || user.displayName || 'SISTEMA',
     Materials: payload.materials ? materialsTvp(payload.materials) : materialsTvp([]),
     WorkTypes: payload.workTypes ? workTypesTvp(payload.workTypes) : workTypesTvp([]),
   });

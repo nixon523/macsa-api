@@ -59,6 +59,22 @@ router.post('/:assetCode/transfer', ...transferValidators);
 router.post('/:assetCode/reactivar', requirePermission(PERMISSIONS.assetTransfer), assetController.reactivateAsset);
 router.post('/:assetCode/reactivate', requirePermission(PERMISSIONS.assetTransfer), assetController.reactivateAsset);
 
+// Clonación / Duplicación de árbol completo de activo
+router.post(
+  '/:assetCode/clonar-arbol',
+  requirePermission(PERMISSIONS.assetCreate),
+  body('targetAreaId').isString().trim().notEmpty().withMessage('El área destino es obligatoria.'),
+  handleValidationErrors,
+  assetController.cloneAssetTree,
+);
+router.post(
+  '/:assetCode/clone-tree',
+  requirePermission(PERMISSIONS.assetCreate),
+  body('targetAreaId').isString().trim().notEmpty().withMessage('El área destino es obligatoria.'),
+  handleValidationErrors,
+  assetController.cloneAssetTree,
+);
+
 const statusValidators = [
   requirePermission(PERMISSIONS.assetEdit),
   body('newStatus')

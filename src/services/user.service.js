@@ -58,7 +58,7 @@ export async function createUser({ username, displayName, roleCode, password, pe
   return execProc('uspUsuarioCrear', inputs);
 }
 
-export async function updateUser(userId, { displayName, roleCode, newPassword, permissions, employeeId }) {
+export async function updateUser(userId, { username, displayName, roleCode, newPassword, permissions, employeeId }) {
   const perms = Array.isArray(permissions) ? permissions : [];
   const parsedEmployeeId = employeeId !== undefined && employeeId !== null && employeeId !== ''
     ? Number(employeeId)
@@ -66,6 +66,7 @@ export async function updateUser(userId, { displayName, roleCode, newPassword, p
 
   const inputs = {
     UserId: userId,
+    Username: username ? username.trim().toUpperCase() : undefined,
     DisplayName: displayName ?? undefined,
     NewRoleCode: roleCode ?? null,
     NewSalt: undefined,

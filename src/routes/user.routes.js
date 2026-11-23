@@ -28,6 +28,12 @@ router.post(
 
 router.put(
   '/:id',
+  body('username')
+    .optional({ values: 'falsy' })
+    .isString()
+    .trim()
+    .isLength({ min: 3 })
+    .withMessage('El nombre de usuario debe tener al menos 3 caracteres.'),
   body('displayName').optional({ values: 'falsy' }).isString().trim(),
   body('roleCode').optional().isIn(VALID_ROLES).withMessage('El rol especificado no es válido.'),
   body('newPassword').optional({ values: 'falsy' }).isString().isLength({ min: 8 }).withMessage('La nueva contraseña debe tener al menos 8 caracteres.'),

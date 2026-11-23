@@ -11,7 +11,16 @@ export const listOpenWorkOrders = asyncHandler(async (_req, res) => {
 
 export const createWorkOrder = asyncHandler(async (req, res) => {
   const result = await workOrderService.createWorkOrder(req.body, req.user);
-  res.status(201).json(result[0] ?? result);
+  const row = result[0] ?? result ?? {};
+  const woId = row.WorkOrderId || row.workOrderId || row.id || row.WorkOrderNumber || row.workOrderNumber || '';
+  res.status(201).json({
+    ...row,
+    id: woId,
+    workOrderId: woId,
+    WorkOrderId: woId,
+    workOrderNumber: woId,
+    WorkOrderNumber: woId,
+  });
 });
 
 export const updateWorkOrderStatus = asyncHandler(async (req, res) => {

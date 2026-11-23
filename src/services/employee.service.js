@@ -21,7 +21,7 @@ export async function createEmployee(payload, user) {
     PuestoId: positionId !== null && positionId !== '' ? Number(positionId) : null,
     EsMantenimiento: payload.isMaintenance !== false ? 1 : 0,
     UsuarioId: user.userId,
-    NombreUsuario: user.displayName,
+    NombreUsuario: user.username || user.displayName || 'SISTEMA',
   });
 }
 
@@ -36,7 +36,7 @@ export async function updateEmployee(employeeId, payload, user) {
     EsMantenimiento: payload.isMaintenance !== false ? 1 : 0,
     Activo: payload.isActive !== false ? 1 : 0,
     UsuarioId: user.userId,
-    NombreUsuario: user.displayName,
+    NombreUsuario: user.username || user.displayName || 'SISTEMA',
   });
 }
 
@@ -45,7 +45,7 @@ export async function toggleEmployeeStatus(employeeId, active, user) {
     EmpleadoId: Number(employeeId),
     Activo: active ? 1 : 0,
     UsuarioId: user.userId,
-    NombreUsuario: user.displayName,
+    NombreUsuario: user.username || user.displayName || 'SISTEMA',
   });
 }
 
@@ -63,7 +63,7 @@ export async function createPosition(payload, user) {
     Nombre: payload.name || payload.nombre,
     EsMantenimiento: payload.isMaintenance !== false ? 1 : 0,
     UsuarioId: user.userId,
-    NombreUsuario: user.displayName,
+    NombreUsuario: user.username || user.displayName || 'SISTEMA',
   });
 }
 
@@ -73,7 +73,7 @@ export async function updatePosition(positionId, payload, user) {
     Nombre: payload.name || payload.nombre,
     EsMantenimiento: payload.isMaintenance !== false ? 1 : 0,
     UsuarioId: user.userId,
-    NombreUsuario: user.displayName,
+    NombreUsuario: user.username || user.displayName || 'SISTEMA',
   });
 }
 
@@ -81,6 +81,6 @@ export async function deletePosition(positionId, user) {
   return execProc('uspPuestoEliminar', {
     PuestoId: Number(positionId),
     UsuarioId: user.userId,
-    NombreUsuario: user.displayName,
+    NombreUsuario: user.username || user.displayName || 'SISTEMA',
   });
 }

@@ -30,12 +30,12 @@ export async function findAssetBySerial(serial) {
 }
 
 export async function createAsset(payload, user) {
-  return execProc('uspActivoCrear', {
+  const rows = await execProc('uspActivoCrear', {
     Name: payload.name,
     Brand: payload.brand ?? null,
     Model: payload.model ?? null,
     AreaId: payload.areaId,
-    StationId: payload.stationId ?? null,
+    StationId: payload.stationId ?? '',
     Level: payload.level,
     ParentAssetCode: payload.parentAssetCode || null,
     Status: payload.status ?? 'active',
@@ -44,9 +44,19 @@ export async function createAsset(payload, user) {
       ? JSON.stringify(payload.dynamicAttributes)
       : null,
     ImageData: payload.imageData ?? null,
+    Observaciones: payload.observations ?? payload.observaciones ?? null,
     UserId: user.userId,
-    UserName: user.displayName,
+    UserName: user.username || user.displayName || 'SISTEMA',
   });
+  const row = rows[0] ?? {};
+  const code = row.CodigoActivo ?? row.codigoActivo ?? row.NewAssetCode ?? row.assetCode ?? '';
+  return [{
+    ...row,
+    assetCode: code,
+    CodigoActivo: code,
+    newAssetCode: code,
+    NewAssetCode: code,
+  }];
 }
 
 export async function updateAsset(assetCode, payload, user) {
@@ -56,13 +66,28 @@ export async function updateAsset(assetCode, payload, user) {
     Brand: payload.brand ?? null,
     Model: payload.model ?? null,
     StationId: payload.stationId ?? null,
+    Serial: payload.serial ?? null,
     Status: payload.status,
     DynamicAttributes: payload.dynamicAttributes
       ? JSON.stringify(payload.dynamicAttributes)
       : null,
     ImageData: payload.imageData ?? null,
+    Observaciones: payload.observations ?? payload.observaciones ?? null,
     UserId: user.userId,
-    UserName: user.displayName,
+    UserName: user.username || user.displayName || 'SISTEMA',
+  });
+}
+
+export async function cloneAssetTree(sourceAssetCode, { targetAreaId, newRootName, newSerial, observations, copyAttributes }, user) {
+  return execProc('uspActivoClonarArbol', {
+    CodigoActivoOrigen: sourceAssetCode,
+    AreaDestinoId: targetAreaId,
+    NuevoNombreRaiz: newRootName || null,
+    NuevoSerialRaiz: newSerial || null,
+    Observaciones: observations || null,
+    CopiarAtributos: copyAttributes !== false ? 1 : 0,
+    UserId: user.userId,
+    UserName: user.username || user.displayName || 'SISTEMA',
   });
 }
 
@@ -71,7 +96,7 @@ export async function transferAsset(assetCode, targetAreaId, user) {
     SourceAssetCode: assetCode,
     TargetAreaId: targetAreaId,
     UserId: user.userId,
-    UserName: user.displayName,
+    UserName: user.username || user.displayName || 'SISTEMA',
   });
 }
 
@@ -79,7 +104,7 @@ export async function reactivateAsset(assetCode, user) {
   return execProc('uspActivoReactivar', {
     AssetCode: assetCode,
     UserId: user.userId,
-    UserName: user.displayName,
+    UserName: user.username || user.displayName || 'SISTEMA',
   });
 }
 
@@ -89,6 +114,6 @@ export async function toggleAssetStatus(assetCode, { newStatus, reason }, user) 
     NewStatus: newStatus,
     Reason: reason ?? null,
     UserId: user.userId,
-    UserName: user.displayName,
+    UserName: user.username || user.displayName || 'SISTEMA',
   });
 }

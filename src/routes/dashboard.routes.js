@@ -9,5 +9,17 @@ const router = Router();
 
 router.get('/estadisticas', requireAuth, requirePermission(PERMISSIONS.dashboardView), dashboardController.getStats);
 router.get('/stats', requireAuth, requirePermission(PERMISSIONS.dashboardView), dashboardController.getStats);
+router.get(
+  '/mantenimientos-centro-costo',
+  requireAuth,
+  requirePermission(PERMISSIONS.dashboardView),
+  dashboardController.getMaintenanceByCostCenter,
+);
+router.get(
+  '/mantenimientos-centro-costo/detalle',
+  requireAuth,
+  requirePermission(PERMISSIONS.dashboardView),
+  dashboardController.getMaintenanceByCostCenterDetails,
+);
 
 export default router;

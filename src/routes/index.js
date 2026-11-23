@@ -14,6 +14,7 @@ import operationReportRoutes from './operationReport.routes.js';
 import appUpdateRoutes from './app_update.routes.js';
 import employeeRoutes from './employee.routes.js';
 import catalogRoutes from './catalog.routes.js';
+import templateRoutes from './template.routes.js';
 
 const router = Router();
 
@@ -35,6 +36,7 @@ router.use('/dashboard', dashboardRoutes);
 router.use('/reportes-operacion', operationReportRoutes);
 router.use('/empleados', employeeRoutes);
 router.use('/catalogos', catalogRoutes);
+router.use('/plantillas-activos', templateRoutes);
 router.use('/app', appUpdateRoutes);
 router.use('/aplicacion', appUpdateRoutes);
 
@@ -48,5 +50,6 @@ router.use('/breakdown-reports', breakdownRoutes);
 router.use('/preventive-schedules', preventiveRoutes);
 router.use('/employees', employeeRoutes);
 router.use('/catalogs', catalogRoutes);
+router.use('/asset-templates', templateRoutes);
 
 export default router;

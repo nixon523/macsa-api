@@ -10,8 +10,8 @@ export class ApiError extends Error {
     return new ApiError(400, message, details);
   }
 
-  static unauthorized(message = 'No autenticado') {
-    return new ApiError(401, message);
+  static unauthorized(message = 'No autenticado', details = undefined) {
+    return new ApiError(401, message, details);
   }
 
   static forbidden(message = 'No autorizado') {
