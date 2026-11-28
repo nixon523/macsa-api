@@ -3,7 +3,7 @@ import { body } from 'express-validator';
 
 import * as workOrderController from '../controllers/workOrder.controller.js';
 import { requireAuth } from '../middleware/auth.middleware.js';
-import { requirePermission } from '../middleware/permission.middleware.js';
+import { requirePermission, requireAnyPermission } from '../middleware/permission.middleware.js';
 import { handleValidationErrors } from '../middleware/validate.middleware.js';
 import { PERMISSIONS, WORK_ORDER_PRIORITIES, WORK_ORDER_STATUSES } from '../security/rolePermissions.js';
 
@@ -36,7 +36,7 @@ router.post(
 );
 
 const statusValidators = [
-  requirePermission(PERMISSIONS.workOrderCreate),
+  requireAnyPermission(PERMISSIONS.workOrderCreate, PERMISSIONS.workOrderExecute),
   body('newStatus').isIn(WORK_ORDER_STATUSES).withMessage('Estado inválido.'),
   handleValidationErrors,
   workOrderController.updateWorkOrderStatus,
@@ -46,9 +46,9 @@ router.patch('/:id/status', ...statusValidators);
 
 router.put(
   '/:id',
-  requirePermission(PERMISSIONS.workOrderCreate),
-  body('description').isString().trim().notEmpty(),
-  body('priority').isIn(WORK_ORDER_PRIORITIES),
+  requireAnyPermission(PERMISSIONS.workOrderCreate, PERMISSIONS.workOrderExecute),
+  body('description').optional().isString().trim(),
+  body('priority').optional().isIn(WORK_ORDER_PRIORITIES),
   materialRules,
   handleValidationErrors,
   workOrderController.updateWorkOrderDetails,

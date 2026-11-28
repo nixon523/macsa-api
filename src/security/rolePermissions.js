@@ -8,6 +8,8 @@
   assetDeleteApprove: 'asset.delete.approve',
   workOrderView: 'work_order.view',
   workOrderCreate: 'work_order.create',
+  workOrderExecute: 'work_order.execute',
+  workOrderApprove: 'work_order.approve',
   workOrderPrint: 'work_order.print',
   preventiveView: 'preventive.view',
   preventiveManage: 'preventive.manage',
@@ -21,7 +23,7 @@
   userManage: 'user.manage',
 };
 
-export const VALID_ROLES = ['admin', 'jefe', 'jefe_area', 'reportador', 'lector'];
+export const VALID_ROLES = ['admin', 'jefe', 'jefe_area', 'tecnico', 'reportador', 'lector'];
 
 export const ASSET_LEVELS = ['equipment', 'subEquipment', 'part', 'subPart'];
 
@@ -29,7 +31,16 @@ export const ASSET_STATUSES = ['active', 'transferredDeactivated', 'inactive', '
 
 export const WORK_ORDER_PRIORITIES = ['low', 'medium', 'high'];
 
-export const WORK_ORDER_STATUSES = ['pending', 'inProgress', 'completed', 'unfulfilled', 'cancelled'];
+export const WORK_ORDER_STATUSES = [
+  'pending',
+  'inProgress',
+  'paused',
+  'reviewPending',
+  'completed',
+  'unfulfilled',
+  'cancelled',
+  'rescheduled',
+];
 
 export const BREAKDOWN_SEVERITIES = ['low', 'medium', 'high', 'critical'];
 
@@ -99,6 +110,8 @@ const ROLE_DEFAULT_PERMISSIONS = {
     PERMISSIONS.assetDeleteRequest,
     PERMISSIONS.workOrderView,
     PERMISSIONS.workOrderCreate,
+    PERMISSIONS.workOrderExecute,
+    PERMISSIONS.workOrderApprove,
     PERMISSIONS.workOrderPrint,
     PERMISSIONS.preventiveView,
     PERMISSIONS.preventiveManage,
@@ -109,6 +122,14 @@ const ROLE_DEFAULT_PERMISSIONS = {
     PERMISSIONS.operationReportView,
     PERMISSIONS.operationReportEdit,
     PERMISSIONS.employeeManage,
+  ],
+  tecnico: [
+    PERMISSIONS.workOrderView,
+    PERMISSIONS.workOrderExecute,
+    PERMISSIONS.workOrderPrint,
+    PERMISSIONS.assetView,
+    PERMISSIONS.breakdownView,
+    PERMISSIONS.breakdownReport,
   ],
   jefe_area: [
     PERMISSIONS.dashboardView,

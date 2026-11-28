@@ -66,22 +66,37 @@ export async function createWorkOrder(payload, user) {
   });
 }
 
-export async function updateWorkOrderStatus(workOrderId, newStatus, user) {
+export async function updateWorkOrderStatus(workOrderId, newStatus, user, extra = {}) {
   return execProc('uspOrdenTrabajoActualizarEstado', {
     WorkOrderId: workOrderId,
     NewStatus: newStatus,
     UserId: user.userId,
     UserName: user.username || user.displayName || 'SISTEMA',
+    MotivoPausa: extra.motivoPausa || extra.pauseReason || null,
+    MotivoReprogramacion: extra.motivoReprogramacion || extra.unfulfillmentReason || null,
+    FechaReprogramacion: typed(sql.DateTime2, toDateOrNull(extra.fechaReprogramacion || extra.reprogramDate)),
+    HorasReales: extra.horasReales != null ? Number(extra.horasReales) : null,
+    TrabajoRealizado: extra.trabajoRealizado || extra.workDoneDescription || null,
+    Observaciones: extra.observaciones || null,
   });
 }
 
 export async function updateWorkOrderDetails(workOrderId, payload, user) {
+  // Calculo automatico del personal asignado si se proporcionan nombres
+  let staffCount = payload.assignedStaffCount ?? null;
+  if (staffCount == null && payload.assignedTo && typeof payload.assignedTo === 'string') {
+    const list = payload.assignedTo.split(',').map((s) => s.trim()).filter(Boolean);
+    if (list.length > 0) {
+      staffCount = list.length;
+    }
+  }
+
   return execProc('uspOrdenTrabajoActualizarDetalles', {
     WorkOrderId: workOrderId,
     Description: payload.description ?? null,
     Priority: payload.priority ?? null,
     AssignedTo: payload.assignedTo ?? null,
-    AssignedStaffCount: payload.assignedStaffCount ?? null,
+    AssignedStaffCount: staffCount,
     EstimatedHours: payload.estimatedHours ?? null,
     ActualHours: payload.actualHours ?? null,
     WorkDoneDescription: payload.workDoneDescription ?? null,
@@ -90,6 +105,8 @@ export async function updateWorkOrderDetails(workOrderId, payload, user) {
     ReprogramDate: typed(sql.DateTime2, toDateOrNull(payload.reprogramDate)),
     AccHaccpResponsible: payload.accHaccpResponsible ?? null,
     MaintenanceResponsible: payload.maintenanceResponsible ?? null,
+    ResponsableJefeArea: payload.areaHeadResponsible ?? payload.responsableJefeArea ?? null,
+    ResponsableJefeMantenimiento: payload.maintenanceHeadResponsible ?? payload.responsableJefeMantenimiento ?? null,
     ScheduledDate: typed(sql.DateTime2, toDateOrNull(payload.scheduledDate)),
     UserId: user.userId,
     UserName: user.username || user.displayName || 'SISTEMA',

@@ -24,10 +24,24 @@ export const createWorkOrder = asyncHandler(async (req, res) => {
 });
 
 export const updateWorkOrderStatus = asyncHandler(async (req, res) => {
+  const { newStatus } = req.body;
+  if (newStatus === 'completed') {
+    const hasApprove =
+      req.user.role === 'admin' ||
+      req.user.role === 'jefe' ||
+      (Array.isArray(req.user.permissions) && req.user.permissions.includes('work_order.approve'));
+    if (!hasApprove) {
+      return res.status(403).json({
+        message: 'Solo el Jefe de Mantenimiento o un usuario con permiso de aprobación puede cerrar y aprobar la orden de trabajo.',
+      });
+    }
+  }
+
   await workOrderService.updateWorkOrderStatus(
     req.params.id,
-    req.body.newStatus,
+    newStatus,
     req.user,
+    req.body,
   );
   res.json({ message: 'Estado de la OT actualizado correctamente.' });
 });
